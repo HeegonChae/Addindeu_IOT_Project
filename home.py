@@ -6,9 +6,11 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import * 
 from PyQt5 import uic 
 from PyQt5.QtCore import *
-'''
+
 class Receiver(QThread):
-    detected = pyqtSignal(bytes)
+    detected = pyqtSignal(bytes) #OF
+    c_sensored = pyqtSignal(bytes) #CS
+    tagged =  pyqtSignal(bytes) #ID
 
     def __init__(self, conn, parent = None):
         super(Receiver, self).__init__(parent)
@@ -23,20 +25,26 @@ class Receiver(QThread):
             if self.conn.readable():
                 respond = self.conn.read_until(b'\n')
                 if len(respond) > 0 :
-                    respond = respond[:-2] #구분자 삭제 '\r\n'
+                    respond = respond[:-2]
                     cmd = respond[:2].decode()
-                    if cmd == 'GS' and respond[2] == 0 : 
+                    if cmd == 'OF': 
                         print("recv detected")
-                        self.detected.emit(respond[3:])
+                        self.detected.emit(respond[2:])
+                    elif cmd == 'CS': 
+                        print("recv color sensor value")
+                        self.detected.emit(respond[2:])
+                    elif cmd == 'ID': 
+                        print("recv UID")
+                        self.detected.emit(respond[2:])
                     else : 
                         print("unknown error")
                         print(cmd)
+                print("-------------------")
     
     def stop(self):
         print("recv stop")
         self.is_running = False
 
-'''
 from_class = uic.loadUiType("home.ui")[0]
 
 class WindowClass(QMainWindow, from_class) :
@@ -46,26 +54,38 @@ class WindowClass(QMainWindow, from_class) :
         self.setupUi(self)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-    def dbConnection(self):
-        self.conn = mysql.connector.connect(
-        host = "localhost",
-        port = 3306,
-        user = "root",
-        password = "****",
-        database ="iot_project"
-        )
-        self.cursor = self.conn.cursor(buffered=True)
+        self.conn = serial.Serial(port='/dev/ttyACM0', baudrate = 9600, timeout = 1)
+
+        self.recv = Receiver(self.conn)
+        self.recv.start()
+
+        self.recv.detected.connect(self.detected)
+        self.recv.c_sensored.connect(self.c_sensored)
+        self.recv.tagged.connect(self.tagged)
+
+    def detected(self,data):
+        print("detected")
+        if data :
+            print(1)
+        else :
+            print(0)
+        return
     
-    def disConnection(self):
-        self.conn.close()
+    def c_sensored(self,data):
+        print("c_sensored")
+        if data :
+            print(1)
+        else :
+            print(0)
+        return
     
-    def orderQuery(self,query,addlist):
-        self.cursor.execute(query)
-        result = self.cursor.fetchall()
-        for row in result:
-            addlist.append(row)
-        print(addlist)
-        self.conn.close()
+    def tagged(self,data):
+        print("tagged")
+        if data :
+            print(1)
+        else :
+            print(0)
+        return
 
 
 if __name__ == "__main__" :
