@@ -51,7 +51,7 @@ class WindowClass(QMainWindow, from_class) :
         host = "localhost",
         port = 3306,
         user = "root",
-        password = "1234",
+        password = "****",
         database ="iot_project"
         )
         self.cursor = self.conn.cursor(buffered=True)
