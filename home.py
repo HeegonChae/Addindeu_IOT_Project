@@ -1,5 +1,6 @@
 import sys 
 import serial
+import time
 import struct
 import mysql.connector
 from PyQt5.QtWidgets import * 
@@ -24,6 +25,7 @@ class Receiver(QThread):
         while(self.is_running == True):
             if self.conn.readable():
                 respond = self.conn.read_until(b'\n')
+                recv_test = respond
                 if len(respond) > 0 :
                     respond = respond[:-2]
                     cmd = respond[:2].decode()
@@ -37,8 +39,8 @@ class Receiver(QThread):
                         print("recv UID")
                         self.detected.emit(respond[2:])
                     else : 
-                        print("unknown error")
-                        print(cmd)
+                        print("recv unknown cmd")
+                        print(recv_test.decode())
                 print("-------------------")
     
     def stop(self):
@@ -59,16 +61,25 @@ class WindowClass(QMainWindow, from_class) :
         self.recv = Receiver(self.conn)
         self.recv.start()
 
+        self.powerBtnState = False
+
         self.recv.detected.connect(self.detected)
         self.recv.c_sensored.connect(self.c_sensored)
         self.recv.tagged.connect(self.tagged)
+
+        self.btnEmergency.clicked.connect(self.EmergencyStop)
+        self.btnPower.clicked.connect(self.PowerState)
+        self.btnPower.setStyleSheet("background-color: green;")
 
     def detected(self,data):
         print("detected")
         if data :
             print(1)
+            QMessageBox.information(self,'인식 성공','인식에 성공했습니다. 작업을 시작하세요.')
+            
         else :
             print(0)
+            QMessageBox.warning(self,'인식 실패','인식 실패. 인식을 재시도합니다.')
         return
     
     def c_sensored(self,data):
@@ -86,6 +97,45 @@ class WindowClass(QMainWindow, from_class) :
         else :
             print(0)
         return
+    
+    def Send(self,command, flag=0):
+        print("send flag")
+        data = struct.pack('<2sic', command, flag, b'\n')
+        self.conn.write(data)
+        return
+    
+    def PowerState(self):
+        if self.powerBtnState == False:
+            self.btnPower.setStyleSheet("background-color: red;")
+            self.btnPower.setText("OFF")
+            self.PowerOn()
+            self.powerBtnState = True
+        else :
+            self.btnPower.setStyleSheet("background-color: green;")
+            self.btnPower.setText("On")
+            self.PowerOff()
+            self.powerBtnState = False
+
+    
+    def EmergencyStop(self):
+        print("Emergency Stop")
+        self.Send(b'EM')
+        time.sleep(0.1)
+
+    def PowerOn(self):
+        print("Power On")
+        self.Send(b'PF',1)
+        time.sleep(0.1)
+    
+    def PowerOff(self):
+        print("Power Off")
+        self.Send(b'PF')
+        time.sleep(0.1)
+
+    def TaskFinish(self):
+        print("Emergency Stop")
+        self.Send(b'FN')
+        time.sleep(0.1)
 
 
 if __name__ == "__main__" :
