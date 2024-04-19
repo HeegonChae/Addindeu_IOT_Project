@@ -27,6 +27,9 @@ class Connect():
             #print(addlist)
             # DB 연결 종료
             self.disConnection()
+            
+            return addlist
+        
         else:
             self.conn.commit()  # INSERT, UPDATE, DELETE 등은 commit 필요
             self.disConnection()
@@ -37,4 +40,6 @@ if __name__ == "__main__" :
     addlist = []
     query = "select * from employees"
     
-    db_instance.orderQuery(query, addlist)
+    addlist = db_instance.orderQuery(query, addlist)
+
+    print(addlist)
