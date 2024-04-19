@@ -83,7 +83,7 @@
     </font>
    </property>
    <property name="text">
-    <string>POWER</string>
+    <string>ON</string>
    </property>
   </widget>
   <widget class="QTextEdit" name="editGoal">
