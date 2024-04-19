@@ -4,9 +4,11 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import * 
 from PyQt5 import uic 
 import mysql.connector as con
+from home import * 
 
 login_ui = uic.loadUiType("./src/login.ui")[0]
 register_ui = uic.loadUiType("./src/register.ui")[0]
+home_ui = uic.loadUiType("./src/home.ui")[0]
 
 class RegisterWindow(QDialog, register_ui):
     def __init__(self) :
@@ -26,8 +28,8 @@ class RegisterWindow(QDialog, register_ui):
         conn = con.connect(
             host = "database-1.cdigc6umyoh0.ap-northeast-2.rds.amazonaws.com",
             port = 3306,
-            user = "chae",
-            password = "0111",
+            user = "manager",
+            password = "0000",
             database ="smartfarmdb"
             )
         cursor = conn.cursor(buffered=True)
@@ -68,13 +70,13 @@ class RegisterWindow(QDialog, register_ui):
         goal = self.enterGoal.text()
         # print(name)
         _, result = self.orderQuery(f"select * from employees where PW = \'{pw}\'")
-        print("----------------------------")
-        print(result)
-
+        # print("----------------------------")
+        # print(result)
         if (result is not None and pw in result):
             QMessageBox.warning(self, "Register Output", "Already existing worker info\n Try again with new info!")
         else:
-            _, _ = self.orderQuery(f"insert into employees (NAME, ID, PW, GOAL) VALUES (\'{name}\',\'{id}\', \'{pw}\', {goal})", is_select = False)
+            _, _ = self.orderQuery(f"insert into employees (NAME, ID, PW, GOAL, CURRENT, AT_WORK) VALUES (\'{name}\',\'{id}\', \'{pw}\', {goal}, {0}, \'{0}\')",
+                                   is_select = False)
             QMessageBox.information(self, "Register Output", "Your info is successfully registered!\n You can login now!")
             self.LoginOpen()
 
@@ -151,11 +153,21 @@ class LoginWindow(QDialog, login_ui) :
         pw = self.editPw.text()
         
         _, result = self.orderQuery(f"select * from employees where ID = \'{id}\' and PW = \'{pw}\'")
+        # print("----------------------------")
+        # print(result)
         if result:
-        #if True:
             QMessageBox.information(self, "Login Output", "Welcome to 산지직송(주)!\n You login successfully!")
+            widget.setCurrentIndex(2)
         else:
             QMessageBox.warning(self, "Login Output", "Invalid User info!\n Try again or Register new info!")
+
+
+# ChangeWindow 함수 수정
+def ChangeWindow(index):
+    if index == 2:  # HomeWindow의 인덱스가 2일 때
+        widget.setFixedSize(1064, 595)  # HomeWindow에 맞는 크기 설정
+    else:
+        widget.setFixedSize(600, 600)  # 다른 윈도우에 맞는 기본 크기 설정
 
 if __name__ == "__main__" :
     # 프로그램 실행
@@ -165,14 +177,18 @@ if __name__ == "__main__" :
     # 레이아웃 인스턴스 생성
     loginwindow = LoginWindow()
     registerwindow = RegisterWindow()   
+    homewindow = HomeWindow()
     # Widget 추가
     widget.addWidget(loginwindow)
     widget.addWidget(registerwindow)
-    #프로그램 화면 보이기
-    # 처음 화면??
+    widget.addWidget(homewindow)
+    # 프로그램 화면 보이기
+    # 처음 화면
     widget.setCurrentIndex(0)
     widget.setFixedHeight(600)
     widget.setFixedWidth(600)
     widget.show() 
+    # 레이아웃 인스턴스 전환에 따른 창 크기 변경
+    widget.currentChanged.connect(ChangeWindow)
     #프로그램 종료까지 동작시킴
     sys.exit(app.exec_()) 
