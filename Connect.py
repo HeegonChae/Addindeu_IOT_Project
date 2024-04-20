@@ -13,9 +13,12 @@ class Connect():
         self.cursor = self.conn.cursor(buffered=True)
 
     def disConnection(self):
-        self.conn.close()
+        if self.conn:
+            print('!!!!!!DB SHUT DOWN!!!!!!')
+            self.conn.close()
+            self.conn = None
 
-    def orderQuery(self, query, addlist, is_ = 'select'):
+    def orderQuery(self, query, addlist =[], is_ = 'select'):
         # Query 실행
         self.cursor.execute(query)
 
@@ -23,23 +26,27 @@ class Connect():
             result = self.cursor.fetchall()
             for row in result:
                 addlist.append(row)
-            #print("------------------------")
-            #print(addlist)
-            # DB 연결 종료
-            self.disConnection()
-            
             return addlist
-        
         else:
             self.conn.commit()  # INSERT, UPDATE, DELETE 등은 commit 필요
-            self.disConnection()
+            print("DONE")
   
         
 if __name__ == "__main__" :
     db_instance = Connect("manager", "0000")
     addlist = []
-    query = "select * from employees"
-    
-    addlist = db_instance.orderQuery(query, addlist)
 
+    # Case 1.
+    query = "select * from employees"
+    addlist = db_instance.orderQuery(query, addlist)
     print(addlist)
+    # Case 2.
+    query = "insert into employees (NAME, ID, PW, GOAL, CURRENT, AT_WORK) VALUES ('Heegon','2A 2B 2C 2D', '0111', 100, 0, '0')"
+    db_instance.orderQuery(query, is_ = 'insert')
+    query = "select * from employees"
+    addlist = db_instance.orderQuery(query, addlist)
+    print(addlist)
+
+    db_instance.disConnection()
+
+
