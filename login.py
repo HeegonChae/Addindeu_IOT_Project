@@ -1,173 +1,132 @@
-import sys 
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import * 
-from PyQt5.QtGui import * 
-from PyQt5 import uic 
+import sys
+import serial
+import time
+import struct
 import mysql.connector as con
-from home import * 
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5 import uic
+from PyQt5.QtCore import *
+from home import HomeWindow
 
 login_ui = uic.loadUiType("./src/login.ui")[0]
 register_ui = uic.loadUiType("./src/register.ui")[0]
-home_ui = uic.loadUiType("./src/home.ui")[0]
+
+class Receiver(QThread):
+    detected = pyqtSignal(bytes) #OF
+    c_sensored = pyqtSignal(bytes) #CS
+    tagged =  pyqtSignal(bytes) #ID
+
+    def __init__(self, parent = None):
+        super(Receiver, self).__init__(parent)
+        self.is_running = False
+        #self.conn = conn
+        print("login recv init")
+
+    def run(self):
+        print("login recv start")
+        self.is_running = True
+        while(self.is_running == True):
+                print("@@@@@@@@@@@@@@@@@@@@@@@@@@")
+                time.sleep(10)
+
+    def stop(self):
+        print("login recv stop")
+        self.is_running = False
 
 class RegisterWindow(QDialog, register_ui):
-    def __init__(self) :
+    def __init__(self, DBconn) :
         super().__init__()
         self.setupUi(self)
-        
+
         # Placeholder text 설정
-        self.enterName.setPlaceholderText("Enter the Name") 
-        self.enterId.setPlaceholderText("Enter the ID") 
-        self.enterPw.setPlaceholderText("Enter the Password") 
-        self.enterGoal.setPlaceholderText("Enter the Goal workload") 
-
+        self.enterName.setPlaceholderText("Enter the Name")
+        self.enterId.setPlaceholderText("Enter the ID")
+        self.enterPw.setPlaceholderText("Enter the Password")
+        self.enterGoal.setPlaceholderText("Enter the Goal workload")
         self.btnRegister.clicked.connect(self.Register)
-        self.btnLoginnow.clicked.connect(self.LoginOpen)
 
-    def dbConnection(self):
-        conn = con.connect(
-            host = "database-1.cdigc6umyoh0.ap-northeast-2.rds.amazonaws.com",
-            port = 3306,
-            user = "manager",
-            password = "0000",
-            database ="smartfarmdb"
-            )
-        cursor = conn.cursor(buffered=True)
-        return conn, cursor
+        # DB 인스턴스 파라미터 
+        self.DBconn = DBconn
 
-    def disConnection(self, conn):
-        conn.close()
-    
-    def orderQuery(self, query, addlist = '', is_select = True):
-        # DB 연결 시작
-        conn, cursor = self.dbConnection()
-        # Query 실행
-        cursor.execute(query)
-
-        if is_select:
-            if (len(addlist) == 0):
-                result = cursor.fetchone()
-                # DB 연결 종료
-                self.disConnection(conn)
-                return conn, result
-            else:
-                result = cursor.fetchall()
-                for row in result:
-                    addlist.append(row)
-                print(addlist)
-                # DB 연결 종료
-                self.disConnection(conn)
-                #return conn, addlist
-        else:
-            conn.commit()  # INSERT, UPDATE, DELETE 등은 commit 필요
-            self.disConnection(conn)
-            return None, None
-        
     def Register(self):
         name = self.enterName.text()
         id =  self.enterId.text()
         pw = self.enterPw.text()
         goal = self.enterGoal.text()
         # print(name)
-        _, result = self.orderQuery(f"select * from employees where PW = \'{pw}\'")
-        # print("----------------------------")
-        # print(result)
-        if (result is not None and pw in result):
-            QMessageBox.warning(self, "Register Output", "Already existing worker info\n Try again with new info!")
+        
+        addlist = [] # 각 요소가 길이 6 크기의 튜플(tup)
+        fisrt_query = f"select * from employees where ID = \'{id}\'"
+        addlist = self.DBconn.orderQuery(fisrt_query, addlist)
+
+        if (len(addlist) != 0):
+            for tup in addlist:
+                if id in tup:
+                    QMessageBox.warning(self, "Register Output", "Already existing worker info\n Try again with new info!")
+                    break
         else:
-            _, _ = self.orderQuery(f"insert into employees (NAME, ID, PW, GOAL, CURRENT, AT_WORK) VALUES (\'{name}\',\'{id}\', \'{pw}\', {goal}, {0}, \'{0}\')",
-                                   is_select = False)
+            second_query = f"insert into employees (NAME, ID, PW, GOAL, CURRENT, AT_WORK) VALUES (\'{name}\',\'{id}\', \'{pw}\', {goal}, {0}, \'{0}\')"
+            self.DBconn.orderQuery(second_query, is_ = "insert")
             QMessageBox.information(self, "Register Output", "Your info is successfully registered!\n You can login now!")
-            self.LoginOpen()
+            # 원래는 Login.ui로 자동 이동
 
-    def LoginOpen(self):
-        self.enterName.clear()
-        self.enterId.clear()
-        self.enterPw.clear()
-        self.enterGoal.clear()
-        widget.setCurrentIndex(0)
-
-class LoginWindow(QDialog, login_ui) :
-    def __init__(self) :
+class LoginWindow(QDialog, login_ui):
+    def __init__(self, logrecvFlag, DBconn):
         super().__init__()
         self.setupUi(self)
-
+        self.uid = "123123"
+        
         # Placeholder text 설정
-        self.editId.setPlaceholderText("ex.Chae") 
-        self.editPw.setPlaceholderText("ex. 83 2B 07 F0") 
-
+        self.editId.setPlaceholderText("ex.83 2B 07 F0")
+        self.editPw.setPlaceholderText("ex. nnnn")
+        
         # editPw 텍스트 변경 시 'READY TO' show 처리
         self.label_4.hide()
         self.editPw.textChanged.connect(self.PwChanged)
-
         self.btnLogin.clicked.connect(self.Login)
-        self.btnRegisternow.clicked.connect(self.RegisterOpen)
 
-    def dbConnection(self):
-        conn = con.connect(
-            host = "database-1.cdigc6umyoh0.ap-northeast-2.rds.amazonaws.com",
-            port = 3306,
-            user = "chae",
-            password = "0111",
-            database ="smartfarmdb"
-            )
-        cursor = conn.cursor(buffered=True)
-        return conn, cursor
-
-    def disConnection(self, conn):
-        conn.close()
-    
-    def orderQuery(self, query, addlist = ''):
-        # DB 연결 시작
-        conn, cursor = self.dbConnection()
-        # Query 실행
-        cursor.execute(query)
-
-        if (len(addlist) == 0):
-            result = cursor.fetchone()
-            # DB 연결 종료
-            self.disConnection(conn)
-            return conn, result
+        # DB 인스턴스 파라미터 
+        self.DBconn = DBconn
+ 
+        if logrecvFlag == True:
+            self.recv = Receiver()
+            self.recv.start()
+            print("1111111111111111111111111")
         else:
-            result = cursor.fetchall()
-            for row in result:
-                addlist.append(row)
-            print(addlist)
-            # DB 연결 종료
-            self.disConnection(conn)
-            #return conn, addlist
+            print("00000000000000000000000000")
+        self.logrecvFlag = logrecvFlag
 
+    def GetUid(self):
+        print("login.py getuid")
+        print(self.uid)
+        print('~!~!')
+
+        return self.uid
+    
     def PwChanged(self, text):
         # 입력된 텍스트가 비어 있지 않으면 label_4 보이기
         if text:
             self.label_4.show()
 
-    def RegisterOpen(self):
-        self.editId.clear()
-        self.editPw.clear()
-        widget.setCurrentIndex(1)
-
-
     def Login(self):
         id = self.editId.text()
         pw = self.editPw.text()
-        
-        _, result = self.orderQuery(f"select * from employees where ID = \'{id}\' and PW = \'{pw}\'")
-        # print("----------------------------")
-        # print(result)
-        if result:
-            QMessageBox.information(self, "Login Output", "Welcome to 산지직송(주)!\n You login successfully!")
-            widget.setCurrentIndex(2)
+        addlist = []
+        query = f"select * from employees where ID = \'{id}\' and PW = \'{pw}\'"
+        addlist = self.DBconn.orderQuery(query,addlist)
+
+        if (len(addlist) != 0):
+            for tup in addlist:
+                if (id in tup) and (pw in tup):
+                    QMessageBox.information(self, f"Login Output", "Welcome to 산지직송(주)!\n You login successfully!")
+                    break
+            if self.logrecvFlag == True:
+                self.recv.stop()
         else:
             QMessageBox.warning(self, "Login Output", "Invalid User info!\n Try again or Register new info!")
 
-
-# ChangeWindow 함수 수정
-def ChangeWindow(index):
-    if index == 2:  # HomeWindow의 인덱스가 2일 때
-        widget.setFixedSize(1064, 595)  # HomeWindow에 맞는 크기 설정
-    else:
-        widget.setFixedSize(600, 600)  # 다른 윈도우에 맞는 기본 크기 설정
 
 if __name__ == "__main__" :
     # 프로그램 실행
@@ -175,9 +134,9 @@ if __name__ == "__main__" :
     # 화면 전환용 Widget 설정
     widget = QtWidgets.QStackedWidget()
     # 레이아웃 인스턴스 생성
-    loginwindow = LoginWindow()
+    loginwindow = LoginWindow(True)
     registerwindow = RegisterWindow()   
-    homewindow = HomeWindow()
+    homewindow = HomeWindow(False)
     # Widget 추가
     widget.addWidget(loginwindow)
     widget.addWidget(registerwindow)
@@ -188,7 +147,6 @@ if __name__ == "__main__" :
     widget.setFixedHeight(600)
     widget.setFixedWidth(600)
     widget.show() 
-    # 레이아웃 인스턴스 전환에 따른 창 크기 변경
-    widget.currentChanged.connect(ChangeWindow)
+
     #프로그램 종료까지 동작시킴
     sys.exit(app.exec_()) 
