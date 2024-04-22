@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import uic
 from PyQt5.QtCore import *
-from home import HomeWindow
 
 login_ui = uic.loadUiType("./src/login.ui")[0]
 register_ui = uic.loadUiType("./src/register.ui")[0]
@@ -21,14 +20,13 @@ class Receiver(QThread):
     def __init__(self, parent = None):
         super(Receiver, self).__init__(parent)
         self.is_running = False
-        #self.conn = conn
         print("login recv init")
 
     def run(self):
         print("login recv start")
         self.is_running = True
         while(self.is_running == True):
-                print("@@@@@@@@@@@@@@@@@@@@@@@@@@")
+                print("running login recv...")
                 time.sleep(10)
 
     def stop(self):
@@ -60,23 +58,26 @@ class RegisterWindow(QDialog, register_ui):
         addlist = [] # 각 요소가 길이 6 크기의 튜플(tup)
         fisrt_query = f"select * from employees where ID = \'{id}\'"
         addlist = self.DBconn.orderQuery(fisrt_query, addlist)
-
+        #print("----------------------------------")
+        #print(addlist)
         if (len(addlist) != 0):
             for tup in addlist:
                 if id in tup:
                     QMessageBox.warning(self, "Register Output", "Already existing worker info\n Try again with new info!")
                     break
         else:
-            second_query = f"insert into employees (NAME, ID, PW, GOAL, CURRENT, AT_WORK) VALUES (\'{name}\',\'{id}\', \'{pw}\', {goal}, {0}, \'{0}\')"
+            second_query = f"insert into employees (NAME, ID, PW, GOAL, CURRENT, AT_WORK) VALUES (\'{name}\',\'{id}\', \'{pw}\', {goal}, 0, 'N')"
             self.DBconn.orderQuery(second_query, is_ = "insert")
             QMessageBox.information(self, "Register Output", "Your info is successfully registered!\n You can login now!")
             # 원래는 Login.ui로 자동 이동
 
 class LoginWindow(QDialog, login_ui):
+    loginSuccess = pyqtSignal(str)  # 로그인 성공 시그널, 사용자 ID 전달
+
     def __init__(self, logrecvFlag, DBconn):
         super().__init__()
         self.setupUi(self)
-        self.uid = "123123"
+        #self.uid = "123123"
         
         # Placeholder text 설정
         self.editId.setPlaceholderText("ex.83 2B 07 F0")
@@ -93,17 +94,10 @@ class LoginWindow(QDialog, login_ui):
         if logrecvFlag == True:
             self.recv = Receiver()
             self.recv.start()
-            print("1111111111111111111111111")
+            print("11111111*login*111111111")
         else:
-            print("00000000000000000000000000")
+            print("00000000*login*000000000")
         self.logrecvFlag = logrecvFlag
-
-    def GetUid(self):
-        print("login.py getuid")
-        print(self.uid)
-        print('~!~!')
-
-        return self.uid
     
     def PwChanged(self, text):
         # 입력된 텍스트가 비어 있지 않으면 label_4 보이기
@@ -122,11 +116,20 @@ class LoginWindow(QDialog, login_ui):
                 if (id in tup) and (pw in tup):
                     QMessageBox.information(self, f"Login Output", "Welcome to 산지직송(주)!\n You login successfully!")
                     break
+            # 안전 장치
             if self.logrecvFlag == True:
                 self.recv.stop()
+                self.logrecvFlag = False
+                # 로그인 성공 시그널 발생
+                self.loginSuccess.emit(id) 
+                # Home 화면에 전달할 uid 정보 업데이트
+                #self.uid = id
+            else: 
+                print("login recv already stopped")
         else:
             QMessageBox.warning(self, "Login Output", "Invalid User info!\n Try again or Register new info!")
-
+            self.editId.clear()
+            self.editPw.clear()
 
 if __name__ == "__main__" :
     # 프로그램 실행
@@ -136,11 +139,9 @@ if __name__ == "__main__" :
     # 레이아웃 인스턴스 생성
     loginwindow = LoginWindow(True)
     registerwindow = RegisterWindow()   
-    homewindow = HomeWindow(False)
     # Widget 추가
     widget.addWidget(loginwindow)
     widget.addWidget(registerwindow)
-    widget.addWidget(homewindow)
     # 프로그램 화면 보이기
     # 처음 화면
     widget.setCurrentIndex(0)
