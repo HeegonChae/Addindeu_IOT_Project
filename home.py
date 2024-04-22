@@ -1,14 +1,15 @@
-import sys 
+import sys
 import serial
 import time
 import struct
-import mysql.connector
-from PyQt5.QtWidgets import * 
-from PyQt5.QtGui import * 
-from PyQt5 import uic 
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5 import uic
 from PyQt5.QtCore import *
+from Connect import Connect
 
 class Receiver(QThread):
+    # '센서에 감지됨'을 전달하는 시그널
     detected = pyqtSignal(bytes) #OF
     c_sensored = pyqtSignal(bytes) #CS
     tagged =  pyqtSignal(bytes) #ID
@@ -16,11 +17,11 @@ class Receiver(QThread):
     def __init__(self, conn, parent = None):
         super(Receiver, self).__init__(parent)
         self.is_running = False
-        self.conn = conn 
-        print("recv init")
-    
+        self.conn = conn
+        print("home recv init")
+
     def run(self):
-        print("recv start")
+        print("home recv start")
         self.is_running = True
         while(self.is_running == True):
             if self.conn.readable():
@@ -29,54 +30,83 @@ class Receiver(QThread):
                 if len(respond) > 0 :
                     respond = respond[:-2]
                     cmd = respond[:2].decode()
-                    if cmd == 'OF': 
+                    if cmd == 'OF':
                         print("recv detected")
                         self.detected.emit(respond[2:])
-                    elif cmd == 'CS': 
+                    elif cmd == 'CS':
                         print("recv color sensor value")
-                        self.detected.emit(respond[2:])
-                    elif cmd == 'ID': 
+                        self.c_sensored.emit(respond[2:])
+                    elif cmd == 'ID':
                         print("recv UID")
-                        self.detected.emit(respond[2:])
-                    else : 
+                        self.tagged.emit(respond[2:])
+                    else :
                         print("recv unknown cmd")
                         print(recv_test.decode())
-                print("-------------------")
-    
+                print("running home recv...")
+                time.sleep(3)
+
     def stop(self):
-        print("recv stop")
+        print("home recv stop")
         self.is_running = False
 
-from_class = uic.loadUiType("home.ui")[0]
-
-class WindowClass(QMainWindow, from_class) :
-    def __init__(self) :
+home_ui = uic.loadUiType("./src/home.ui")[0]
+class HomeWindow(QDialog, home_ui) :
+    def __init__(self, homerecvflag, DBconn) :
         super().__init__()
-
         self.setupUi(self)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        # 타이머 관련 위젯
+        self.timer = QTimer(self)
+        self.timer.setInterval(1000)
+        self.timer.timeout.connect(self.timeout)
+        self.lcdTimer.display('')
+        self.lcdTimer.setDigitCount(8)
 
-        self.conn = serial.Serial(port='/dev/ttyACM0', baudrate = 9600, timeout = 1)
-
-        self.recv = Receiver(self.conn)
-        self.recv.start()
-
+        # DB 인스턴스 파라미터 
+        self.DBconn = DBconn
+        # ON/OFF 클릭 I/O 상태
         self.powerBtnState = False
+        # 로그인 성공 후 전달 받을 ID??
+        self.uid = None
+        # 아두이노와 통신 프로토콜 담당
+        self.BTconn = serial.Serial(port='/dev/ttyACM0', baudrate = 9600, timeout = 1)
+
+        if homerecvflag == True:
+            self.recv = Receiver(self.BTconn)
+            self.recv.start()
+            print("111111111*home*11111111")
+            # 타이머 시작
+            self.timer.start()
+        else:
+            print("000000000*home*000000000")
+        self.homerecvflag = homerecvflag
 
         self.recv.detected.connect(self.detected)
         self.recv.c_sensored.connect(self.c_sensored)
         self.recv.tagged.connect(self.tagged)
-
+        
+        # Emergency Stop 버튼 이벤트 처리
         self.btnEmergency.clicked.connect(self.EmergencyStop)
+        # Power 버튼 이벤트 처리
         self.btnPower.clicked.connect(self.PowerState)
         self.btnPower.setStyleSheet("background-color: green;")
-
+    
+    def timeout(self):
+        # 날짜
+        datetime = QDateTime.currentDateTime()
+        self.labelDate.setText(datetime.toString('yyyy-MM-dd'))
+        # 시간
+        sender = self.sender()
+        currentTime = QTime.currentTime().toString("hh:mm:ss")
+        if id(sender) == id(self.timer):
+            self.lcdTimer.display(currentTime)
+        # 날씨
+        
     def detected(self,data):
         print("detected")
         if data :
             print(1)
             QMessageBox.information(self,'인식 성공','인식에 성공했습니다. 작업을 시작하세요.')
-            
         else :
             print(0)
             QMessageBox.warning(self,'인식 실패','인식 실패. 인식을 재시도합니다.')
@@ -94,6 +124,7 @@ class WindowClass(QMainWindow, from_class) :
         print("tagged")
         if data :
             print(1)
+            #self.uid = data
         else :
             print(0)
         return
@@ -101,7 +132,7 @@ class WindowClass(QMainWindow, from_class) :
     def Send(self,command, flag=0):
         print("send flag")
         data = struct.pack('<2sic', command, flag, b'\n')
-        self.conn.write(data)
+        self.BTconn.write(data)
         return
     
     def PowerState(self):
@@ -116,7 +147,6 @@ class WindowClass(QMainWindow, from_class) :
             self.PowerOff()
             self.powerBtnState = False
 
-    
     def EmergencyStop(self):
         print("Emergency Stop")
         self.Send(b'EM')
@@ -126,7 +156,7 @@ class WindowClass(QMainWindow, from_class) :
         print("Power On")
         self.Send(b'PF',1)
         time.sleep(0.1)
-    
+
     def PowerOff(self):
         print("Power Off")
         self.Send(b'PF')
@@ -140,6 +170,8 @@ class WindowClass(QMainWindow, from_class) :
 
 if __name__ == "__main__" :
     app = QApplication(sys.argv)
-    myWindows = WindowClass()
+    DBconn = Connect("manager", "0000") 
+    myWindows = HomeWindow(True, DBconn)
     myWindows.show()
-    sys.exit(app.exec_()) 
+    DBconn.disConnection()
+    sys.exit(app.exec_())
