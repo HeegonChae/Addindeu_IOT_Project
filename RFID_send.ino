@@ -7,38 +7,58 @@
 
 SoftwareSerial BTSerial(3, 2); //Tx_PIN, Rx_PIN
 
-MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
+MFRC522 rc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
+MFRC522::MIFARE_Key key;
+
+
 
 void setup() {
 	Serial.begin(9600);		// Initialize serial communications with the PC
 	BTSerial.begin(9600);
-  while (!Serial);		// Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4)
-	SPI.begin();			// Init SPI bus
-	mfrc522.PCD_Init();		// Init MFRC522
-	delay(4);				// Optional delay. Some board do need more time after init to be ready, see Readme
-	mfrc522.PCD_DumpVersionToSerial();	// Show details of PCD - MFRC522 Card Reader details
-	Serial.println(F("Scan PICC to see UID, SAK, type, and data blocks..."));
+  SPI.begin();
+  rc522.PCD_Init();
+  for (int i = 0; i < 6; i++)
+  {
+    key.keyByte[i] = 0xFF;
+  }
 }
 
 void loop() {
 	// Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-	if ( ! mfrc522.PICC_IsNewCardPresent()) {
+	if ( ! rc522.PICC_IsNewCardPresent()) {
 		return;
 	}
 
 	// Select one of the cards
-	if ( ! mfrc522.PICC_ReadCardSerial()) {
+	if ( ! rc522.PICC_ReadCardSerial()) {
 		return;
 	}
 
-	// Dump debug info about the card; PICC_HaltA() is automatically called
-  BTSerial.print("READ UID Tag : ");
-  for (byte i = 0; i < mfrc522.uid.size; i++)
+  MFRC522::StatusCode status;
+  status = rc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 60, &key, &(rc522.uid));
+  if (status != MFRC522::STATUS_OK)
   {
-    BTSerial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-    BTSerial.print(mfrc522.uid.uidByte[i], HEX);
+    return;
   }
 
-  Serial.println();
+	// Dump debug info about the card; PICC_HaltA() is automatically called
+
+  String uidString = "";
+  for (byte i = 0; i < rc522.uid.size; i++)
+  {
+    uidString += (rc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+    uidString += String(rc522.uid.uidByte[i], HEX);
+  }
+
+  uidString.toUpperCase();
+
+  
+  BTSerial.println(String("ID") + uidString);
+  Serial.println(String("ID") + uidString);
+  
+  rc522.PICC_HaltA();
+  rc522.PCD_Init();
+
   delay(1000);
+
 }
