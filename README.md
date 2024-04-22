@@ -49,3 +49,9 @@ except KeyboardInterrupt:
     print("Exiting...")
     ser.close()                # 시리얼 포트 닫기
 ```
+#### 블루투스 연결
+```
+sudo apt install blueman
+```
+- GGYUL 연결 (비밀번호 1234)
+- 연결 안 될 경우 bluetooth manager에서 Serial Port 클릭
