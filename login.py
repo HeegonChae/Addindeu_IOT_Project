@@ -9,8 +9,8 @@ from PyQt5.QtGui import *
 from PyQt5 import uic
 from PyQt5.QtCore import *
 
-login_ui = uic.loadUiType("./src/login.ui")[0]
-register_ui = uic.loadUiType("./src/register.ui")[0]
+login_ui = uic.loadUiType("login.ui")[0]
+register_ui = uic.loadUiType("register.ui")[0]
 
 class Receiver(QThread):
     detected = pyqtSignal(bytes) #OF
