@@ -8,6 +8,12 @@ from login import LoginWindow, RegisterWindow
 from home import HomeWindow
 from Connect import Connect
 
+import serial
+import time
+import struct
+import requests
+import json
+
 class MainUI(QWidget): 
     
     def __init__(self, DBconn):
@@ -119,6 +125,47 @@ class MainUI(QWidget):
         self.registerwindow.btnLoginnow.clicked.connect(self.ShowLogin)
         self.loginwindow.loginSuccess.connect(self.OnLoginSuccess)
 
+        # 리더기에서 다시 TAG DATA 읽어오기
+        self.loginwindow.recv.tagged.connect(self.tagged)
+
+    def tagged(self,data):
+        print("tagged")
+        if data :
+            addlist = []
+            self.p = 0
+            self.np = 0
+            self.updateText(self.editP,self.p)
+            self.updateText(self.editNp,self.np)
+            self.uid = data.decode()
+            print(self.uid)
+            query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
+            print(query)
+            addlist = self.DBconn.orderQuery(query,addlist)
+            print(addlist)
+            query = f"UPDATE employees SET NonPass = 0 WHERE ID = \'{self.uid}\'"
+            print(query)
+            self.DBconn.executeQuery(query)
+            query = f"UPDATE employees SET Pass = 0 WHERE ID = \'{self.uid}\'"
+            print(query)
+            self.DBconn.executeQuery(query)
+            query = f"UPDATE employees SET CURRENT = 0 WHERE ID = \'{self.uid}\'"
+            print(query)
+            self.DBconn.executeQuery(query)
+            query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
+            print(query)
+            addlist = []
+            addlist = self.DBconn.orderQuery(query,addlist)
+            self.goal = addlist[0][3]
+            self.updateText(self.editGoal,self.goal)
+        else :
+            QMessageBox.warning(self,'통신 오류','통신에 실패하였습니다.')
+        return
+    
+    def updateText(self,name,value):
+        value = str(value)
+        name.setText(value)
+        name.setAlignment(Qt.AlignCenter)
+    
     def ShowWorkerInfo(self):
         # print(f"User logged in with ID: {self.worker_uid}")
         addlist = []
