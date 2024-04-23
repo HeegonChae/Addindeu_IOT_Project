@@ -7,49 +7,10 @@ from PyQt5.QtGui import *
 from PyQt5 import uic
 from PyQt5.QtCore import *
 from Connect import Connect
+from Receiver import *
 import requests
 import json
 
-class Receiver(QThread):
-    # '센서에 감지됨'을 전달하는 시그널
-    detected = pyqtSignal(bytes) #OF
-    c_sensored = pyqtSignal(bytes) #CS
-    tagged =  pyqtSignal(bytes) #ID
-
-    def __init__(self, conn, parent = None):
-        super(Receiver, self).__init__(parent)
-        self.is_running = False
-        self.conn = conn
-        print("home recv init")
-
-    def run(self):
-        print("home recv start")
-        self.is_running = True
-        while(self.is_running == True):
-            if self.conn.readable():
-                respond = self.conn.read_until(b'\n')
-                recv_test = respond
-                if len(respond) > 0 :
-                    respond = respond[:-2]
-                    cmd = respond[:2].decode()
-                    if cmd == 'OF':
-                        print("recv detected")
-                        self.detected.emit(respond[2:])
-                    elif cmd == 'CS':
-                        print("recv color sensor value")
-                        self.c_sensored.emit(respond[2:])
-                    elif cmd == 'ID':
-                        print("recv UID")
-                        self.tagged.emit(respond[2:])
-                    else :
-                        print("recv unknown cmd")
-                        print(recv_test.decode())
-                print("running home recv...")
-                time.sleep(3)
-
-    def stop(self):
-        print("home recv stop")
-        self.is_running = False
 
 home_ui = uic.loadUiType("home.ui")[0]
 class HomeWindow(QDialog, home_ui) :
@@ -65,6 +26,7 @@ class HomeWindow(QDialog, home_ui) :
         self.timer.timeout.connect(self.Showtime)
         self.lcdTimer.display('')
         self.lcdTimer.setDigitCount(8)
+
         # 날씨 관련 파라미터
         self.forecastApi = "6e357d11903a3df81c1cff95bca0f2af"
         self.location = "Seoul" 
@@ -100,9 +62,7 @@ class HomeWindow(QDialog, home_ui) :
         # Power 버튼 이벤트 처리
         self.btnPower.clicked.connect(self.PowerState)
         self.btnPower.setStyleSheet("background-color: green;")
-        # Logout 버튼 이벤트 처리
-        self.btnLogOut.clicked.connect(self.LogOut)
-
+    
     def LogOut(self):
         # 안전장치
         if self.homerecvflag == False: 
@@ -111,7 +71,7 @@ class HomeWindow(QDialog, home_ui) :
             # self.recv.stop()
             # # 타이머 종료
             # self.timer.stop()
-
+    
     def Showtime(self):
         # 날짜
         datetime = QDateTime.currentDateTime()
@@ -132,30 +92,48 @@ class HomeWindow(QDialog, home_ui) :
         weather = result['weather'][0]['main']
         degree = result['main']['temp']
         self.labelWeather.setText(str(degree) + '\u2103'+'\n'+weather)
-
-    def detected(self,data):    
+        
+    def detected(self,data):
         print("detected")
         if data :
-            print(1)
-            QMessageBox.information(self,'인식 성공','인식에 성공했습니다. 작업을 시작하세요.')
+            print(data.decode())
+            #print(type(data.decode()))
+            if data.decode() == '1' :
+                QMessageBox.information(self,'인식 성공','인식에 성공했습니다. 작업을 시작하세요.')
+            else : 
+                QMessageBox.warning(self,'인식 실패','인식 실패. 인식을 재시도합니다.')
         else :
-            print(0)
-            QMessageBox.warning(self,'인식 실패','인식 실패. 인식을 재시도합니다.')
+            QMessageBox.warning(self,'통신 오류','통신에 실패하였습니다.')
+            
         return
     
     def c_sensored(self,data):
         print("c_sensored")
         if data :
-            print(1)
+            print(data.decode())
+            #print(type(data.decode()))
+            if data.decode() == '1' :
+                query = f"UPDATE employees SET pass = pass + 1 WHERE ID = \'{self.uid}\'"
+                print(query)
+            else : 
+               query = f"UPDATE employees SET NonPass = NonPass + 1 WHERE ID = \'{self.uid}\'"
+               print(query)
+            self.DBconn.executeQuery(query)
         else :
-            print(0)
+            QMessageBox.warning(self,'통신 오류','통신에 실패하였습니다.')
         return
     
     def tagged(self,data):
         print("tagged")
         if data :
-            print(1)
-            #self.uid = data
+            addlist = []
+            self.uid = data.decode()
+            print(self.uid)
+            print(type(self.uid))            
+            query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
+            print(query)
+            addlist = self.DBconn.orderQuery(query,addlist)
+            print(addlist)
         else :
             print(0)
         return
@@ -164,6 +142,7 @@ class HomeWindow(QDialog, home_ui) :
         print("send flag")
         data = struct.pack('<2sic', command, flag, b'\n')
         self.BTconn.write(data)
+        print(data)
         return
     
     def PowerState(self):
@@ -194,15 +173,22 @@ class HomeWindow(QDialog, home_ui) :
         time.sleep(0.1)
 
     def TaskFinish(self):
-        print("Emergency Stop")
+        print("Finished")
         self.Send(b'FN')
         time.sleep(0.1)
 
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     DBconn = Connect("manager", "0000") 
-    myWindows = HomeWindow(True, DBconn)
-    myWindows.show()
-    DBconn.disConnection()
-    sys.exit(app.exec_())
+
+    # Connect 클래스의 인스턴스가 생성되었는지 확인 후 HomeWindow 객체 생성
+    if DBconn.conn is not None:
+        myWindow = HomeWindow(True, DBconn)
+        myWindow.show()
+        app.exec_()
+        # 애플리케이션 종료 시 DB 연결 종료
+        DBconn.disConnection()
+    else:
+        print("DB 연결 실패!")
+        app.exec_()
