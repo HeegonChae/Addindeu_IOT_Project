@@ -16,7 +16,7 @@ home_ui = uic.loadUiType("home.ui")[0]
 class HomeWindow(QDialog, home_ui) :
     logoutSuccess = pyqtSignal(str)  # 로그아웃 성공 시그널
 
-    def __init__(self, homerecvflag, DBconn) :
+    def __init__(self, homerecvflag, homeUid, DBconn) :
         super().__init__()
         self.setupUi(self)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -36,14 +36,16 @@ class HomeWindow(QDialog, home_ui) :
         # count변수
         self.p = 0
         self.np = 0
+        #self.goal = 0
         self.total = self.p + self.np
-
+        
         # DB 인스턴스 파라미터 
         self.DBconn = DBconn
         # ON/OFF 클릭 I/O 상태
         self.powerBtnState = False
-        # 로그인 성공 후 전달 받을 ID??
-        self.uid = None
+        # RFID 리더기에게서 전달 받을 ID
+        self.uid = homeUid
+        self.setInfo()
         # 아두이노와 통신 프로토콜 담당
         self.BTconn = serial.Serial(port='/dev/ttyACM0', baudrate = 9600, timeout = 1)
 
@@ -68,6 +70,8 @@ class HomeWindow(QDialog, home_ui) :
         self.btnPower.clicked.connect(self.PowerState)
         self.btnPower.setStyleSheet("background-color: green;")
         self.btnEmergency.setStyleSheet("background-color: red;")
+        # Logout 버튼 이벤트 처리
+        self.btnLogOut.clicked.connect(self.LogOut)
 
         self.updateText(self.editNow,'-')
         self.updateText(self.editGoal,'-')
@@ -146,6 +150,36 @@ class HomeWindow(QDialog, home_ui) :
                 self.updateText(self.editNow,self.total)
             else :
                 QMessageBox.warning(self,'통신 오류','통신에 실패하였습니다.')
+        return
+    
+    def setInfo(self):
+        addlist = []
+        self.p = 0
+        self.np = 0
+        self.updateText(self.editP,self.p)
+        self.updateText(self.editNp,self.np)
+        
+        print(self.uid)
+        query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
+        print(query)
+        addlist = self.DBconn.orderQuery(query,addlist)
+        print(addlist)
+        query = f"UPDATE employees SET NonPass = 0 WHERE ID = \'{self.uid}\'"
+        print(query)
+        self.DBconn.executeQuery(query)
+        query = f"UPDATE employees SET Pass = 0 WHERE ID = \'{self.uid}\'"
+        print(query)
+        self.DBconn.executeQuery(query)
+        query = f"UPDATE employees SET CURRENT = 0 WHERE ID = \'{self.uid}\'"
+        print(query)
+        self.DBconn.executeQuery(query)
+        query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
+        print(query)
+        addlist = []
+        addlist = self.DBconn.orderQuery(query,addlist)
+        self.goal = addlist[0][3]
+        self.updateText(self.editGoal,self.goal)
+        
         return
     
     def tagged(self,data):

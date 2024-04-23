@@ -9,6 +9,7 @@ from home import HomeWindow
 from Connect import Connect
 
 class MainUI(QWidget): 
+    
     def __init__(self, DBconn):
         super().__init__()
         self.worker_uid = None
@@ -48,7 +49,7 @@ class MainUI(QWidget):
     def OnLoginSuccess(self, userid):
         self.worker_uid = userid
         # homewinodw 인스턴스 생성
-        self.homewindow = HomeWindow(True, DBconn)
+        self.homewindow = HomeWindow(True, userid, DBconn)
         # home.ui tableWidget 초기화 
         self.tableWidget = self.homewindow.tableWidget
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
