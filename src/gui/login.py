@@ -132,6 +132,7 @@ class LoginWindow(QDialog, login_ui):
             # 안전 장치
             if self.logrecvFlag == True:
                 self.recv.stop()
+                
                 # 로그인 성공 시그널 발생
                 self.loginSuccess.emit(id) 
 
