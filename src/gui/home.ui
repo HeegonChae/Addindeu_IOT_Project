@@ -21,15 +21,15 @@
   <widget class="QLabel" name="labelDate">
    <property name="geometry">
     <rect>
-     <x>670</x>
-     <y>20</y>
-     <width>121</width>
-     <height>20</height>
+     <x>680</x>
+     <y>10</y>
+     <width>191</width>
+     <height>41</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>16</pointsize>
+     <pointsize>20</pointsize>
     </font>
    </property>
    <property name="text">
@@ -42,15 +42,15 @@
   <widget class="QLabel" name="labelWeather">
    <property name="geometry">
     <rect>
-     <x>920</x>
+     <x>890</x>
      <y>22</y>
-     <width>121</width>
-     <height>41</height>
+     <width>161</width>
+     <height>71</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>12</pointsize>
+     <pointsize>20</pointsize>
     </font>
    </property>
    <property name="text">
@@ -64,7 +64,7 @@
    <property name="geometry">
     <rect>
      <x>770</x>
-     <y>80</y>
+     <y>120</y>
      <width>131</width>
      <height>111</height>
     </rect>
@@ -83,7 +83,7 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>80</y>
+     <y>120</y>
      <width>131</width>
      <height>111</height>
     </rect>
@@ -97,14 +97,24 @@ STOP</string>
     <string>POWER</string>
    </property>
   </widget>
-  <widget class="QTextEdit" name="editNow_2">
+  <widget class="QTextEdit" name="editNow">
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>410</y>
+     <y>360</y>
      <width>171</width>
      <height>171</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>80</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::StrongFocus</enum>
    </property>
    <property name="readOnly">
     <bool>true</bool>
@@ -114,10 +124,23 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>320</x>
-     <y>410</y>
+     <y>360</y>
      <width>171</width>
      <height>171</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>80</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="contextMenuPolicy">
+    <enum>Qt::DefaultContextMenu</enum>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
    </property>
    <property name="readOnly">
     <bool>true</bool>
@@ -127,10 +150,17 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>570</x>
-     <y>410</y>
+     <y>360</y>
      <width>171</width>
      <height>171</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>80</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
    </property>
    <property name="readOnly">
     <bool>true</bool>
@@ -140,10 +170,17 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>820</x>
-     <y>410</y>
+     <y>360</y>
      <width>171</width>
      <height>171</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>80</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
    </property>
    <property name="readOnly">
     <bool>true</bool>
@@ -153,7 +190,7 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>330</y>
+     <y>280</y>
      <width>67</width>
      <height>61</height>
     </rect>
@@ -174,7 +211,7 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>370</x>
-     <y>330</y>
+     <y>280</y>
      <width>67</width>
      <height>61</height>
     </rect>
@@ -195,7 +232,7 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>620</x>
-     <y>330</y>
+     <y>280</y>
      <width>67</width>
      <height>61</height>
     </rect>
@@ -216,7 +253,7 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>870</x>
-     <y>330</y>
+     <y>280</y>
      <width>67</width>
      <height>61</height>
     </rect>
@@ -258,7 +295,7 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>90</y>
+     <y>130</y>
      <width>581</width>
      <height>91</height>
     </rect>
@@ -287,15 +324,15 @@ STOP</string>
   <widget class="QLCDNumber" name="lcdTimer">
    <property name="geometry">
     <rect>
-     <x>790</x>
-     <y>22</y>
-     <width>111</width>
-     <height>21</height>
+     <x>700</x>
+     <y>60</y>
+     <width>191</width>
+     <height>51</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>16</pointsize>
+     <pointsize>30</pointsize>
      <weight>75</weight>
      <bold>true</bold>
     </font>
@@ -329,7 +366,7 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>920</x>
-     <y>80</y>
+     <y>120</y>
      <width>131</width>
      <height>111</height>
     </rect>
@@ -341,39 +378,6 @@ STOP</string>
    </property>
    <property name="text">
     <string>LOG OUT</string>
-   </property>
-  </widget>
-  <widget class="QProgressBar" name="progressBar">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>260</y>
-     <width>951</width>
-     <height>51</height>
-    </rect>
-   </property>
-   <property name="value">
-    <number>24</number>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_6">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>220</y>
-     <width>361</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>15</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>작업 진행률</string>
    </property>
   </widget>
  </widget>

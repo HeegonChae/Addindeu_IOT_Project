@@ -33,6 +33,11 @@ class HomeWindow(QDialog, home_ui) :
         self.lang = 'kr' #언어
         self.units = 'metric' #화씨 온도를 섭씨 온도로 변경
 
+        # count변수
+        self.p = 0
+        self.np = 0
+        self.total = self.p + self.np
+
         # DB 인스턴스 파라미터 
         self.DBconn = DBconn
         # ON/OFF 클릭 I/O 상태
@@ -62,6 +67,12 @@ class HomeWindow(QDialog, home_ui) :
         # Power 버튼 이벤트 처리
         self.btnPower.clicked.connect(self.PowerState)
         self.btnPower.setStyleSheet("background-color: green;")
+        self.btnEmergency.setStyleSheet("background-color: red;")
+
+        self.updateText(self.editNow,'-')
+        self.updateText(self.editGoal,'-')
+        self.updateText(self.editP,'-')
+        self.updateText(self.editNp,'-')
     
     def LogOut(self):
         # 안전장치
@@ -109,33 +120,65 @@ class HomeWindow(QDialog, home_ui) :
     
     def c_sensored(self,data):
         print("c_sensored")
-        if data :
-            print(data.decode())
-            #print(type(data.decode()))
-            if data.decode() == '1' :
-                query = f"UPDATE employees SET pass = pass + 1 WHERE ID = \'{self.uid}\'"
-                print(query)
-            else : 
-               query = f"UPDATE employees SET NonPass = NonPass + 1 WHERE ID = \'{self.uid}\'"
-               print(query)
-            self.DBconn.executeQuery(query)
+        if self.total >= self.goal :
+            QMessageBox.information(self,'작업 완료','열심히 일한자, 퇴근하라.')
+            self.recv.stop()
+            self.TaskFinish()
         else :
-            QMessageBox.warning(self,'통신 오류','통신에 실패하였습니다.')
+            if data :
+                print(data.decode())
+                #print(type(data.decode()))
+                if data.decode() == '1' :
+                    query = f"UPDATE employees SET pass = pass + 1 WHERE ID = \'{self.uid}\'"
+                    print(query)
+                    self.p += 1
+                    self.updateText(self.editP,self.p)
+                else : 
+                    query = f"UPDATE employees SET NonPass = NonPass + 1 WHERE ID = \'{self.uid}\'"
+                    print(query)
+                    self.np += 1
+                    self.updateText(self.editNp,self.np)
+                    self.DBconn.executeQuery(query)
+                query = f"UPDATE employees SET CURRENT = NonPass + Pass WHERE ID = \'{self.uid}\'"
+                print(query)
+                self.DBconn.executeQuery(query)
+                self.total = self.p + self.np
+                self.updateText(self.editNow,self.total)
+            else :
+                QMessageBox.warning(self,'통신 오류','통신에 실패하였습니다.')
         return
     
     def tagged(self,data):
         print("tagged")
         if data :
             addlist = []
+            self.p = 0
+            self.np = 0
+            self.updateText(self.editP,self.p)
+            self.updateText(self.editNp,self.np)
             self.uid = data.decode()
             print(self.uid)
-            print(type(self.uid))            
             query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
             print(query)
             addlist = self.DBconn.orderQuery(query,addlist)
             print(addlist)
+            query = f"UPDATE employees SET NonPass = 0 WHERE ID = \'{self.uid}\'"
+            print(query)
+            self.DBconn.executeQuery(query)
+            query = f"UPDATE employees SET Pass = 0 WHERE ID = \'{self.uid}\'"
+            print(query)
+            self.DBconn.executeQuery(query)
+            query = f"UPDATE employees SET CURRENT = 0 WHERE ID = \'{self.uid}\'"
+            print(query)
+            self.DBconn.executeQuery(query)
+            query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
+            print(query)
+            addlist = []
+            addlist = self.DBconn.orderQuery(query,addlist)
+            self.goal = addlist[0][3]
+            self.updateText(self.editGoal,self.goal)
         else :
-            print(0)
+            QMessageBox.warning(self,'통신 오류','통신에 실패하였습니다.')
         return
     
     def Send(self,command, flag=0):
@@ -176,7 +219,11 @@ class HomeWindow(QDialog, home_ui) :
         print("Finished")
         self.Send(b'FN')
         time.sleep(0.1)
-
+    
+    def updateText(self,name,value):
+        value = str(value)
+        name.setText(value)
+        name.setAlignment(Qt.AlignCenter)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
