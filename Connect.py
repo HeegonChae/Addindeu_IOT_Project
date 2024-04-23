@@ -2,7 +2,6 @@ import mysql.connector as con
 
 class Connect():
     def __init__(self,User,Password):
-         # DB 연결 시작
         self.conn = con.connect(
             host = "database-1.cdigc6umyoh0.ap-northeast-2.rds.amazonaws.com",
             port = 3306,
@@ -18,7 +17,7 @@ class Connect():
             self.conn.close()
             self.conn = None
 
-    def orderQuery(self, query, addlist =[], is_ = 'select'):
+    def orderQuery(self, query, addlist=[], is_='select'):
         # Query 실행
         self.cursor.execute(query)
 
@@ -28,22 +27,26 @@ class Connect():
                 addlist.append(row)
             return addlist
         else:
-            self.conn.commit()  # INSERT, UPDATE, DELETE 등은 commit 필요
+            self.conn.commit()
             print("DONE")
-  
+
+    def executeQuery(self, query):
+        print("query ok")
+        self.cursor.execute(query)
+        print("execute ok")
+        self.conn.commit()
+        print("commit ok")
+
         
 if __name__ == "__main__" :
     db_instance = Connect("manager", "0000")
     addlist = []
 
     # Case 1.
-    query = "select * from employees"
-    addlist = db_instance.orderQuery(query, addlist)
-    print(addlist)
+    query = "UPDATE employees SET pass = pass + 1 WHERE ID = \'0A 0B 0C 0D\'"
+    db_instance.executeQuery(query)
     # Case 2.
-    query = "insert into employees (NAME, ID, PW, GOAL, CURRENT, AT_WORK) VALUES ('Heegon','2A 2B 2C 2D', '0111', 100, 0, '0')"
-    db_instance.orderQuery(query, is_ = 'insert')
-    query = "select * from employees"
+    query = "SELECT * FROM employees WHERE ID = \'0A 0B 0C 0D\'"
     addlist = db_instance.orderQuery(query, addlist)
     print(addlist)
 

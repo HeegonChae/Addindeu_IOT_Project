@@ -65,26 +65,44 @@ class HomeWindow(QDialog, home_ui) :
     def detected(self,data):
         print("detected")
         if data :
-            print(1)
-            QMessageBox.information(self,'인식 성공','인식에 성공했습니다. 작업을 시작하세요.')
+            print(data.decode())
+            #print(type(data.decode()))
+            if data.decode() == '1' :
+                QMessageBox.information(self,'인식 성공','인식에 성공했습니다. 작업을 시작하세요.')
+            else : 
+                QMessageBox.warning(self,'인식 실패','인식 실패. 인식을 재시도합니다.')
         else :
-            print(0)
-            QMessageBox.warning(self,'인식 실패','인식 실패. 인식을 재시도합니다.')
+            QMessageBox.warning(self,'통신 오류','통신에 실패하였습니다.')
+            
         return
     
     def c_sensored(self,data):
         print("c_sensored")
         if data :
-            print(1)
+            print(data.decode())
+            #print(type(data.decode()))
+            if data.decode() == '1' :
+                query = f"UPDATE employees SET pass = pass + 1 WHERE ID = \'{self.uid}\'"
+                print(query)
+            else : 
+               query = f"UPDATE employees SET NonPass = NonPass + 1 WHERE ID = \'{self.uid}\'"
+               print(query)
+            self.DBconn.executeQuery(query)
         else :
-            print(0)
+            QMessageBox.warning(self,'통신 오류','통신에 실패하였습니다.')
         return
     
     def tagged(self,data):
         print("tagged")
         if data :
-            print(1)
-            #self.uid = data
+            addlist = []
+            self.uid = data.decode()
+            print(self.uid)
+            print(type(self.uid))            
+            query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
+            print(query)
+            addlist = self.DBconn.orderQuery(query,addlist)
+            print(addlist)
         else :
             print(0)
         return
@@ -93,6 +111,7 @@ class HomeWindow(QDialog, home_ui) :
         print("send flag")
         data = struct.pack('<2sic', command, flag, b'\n')
         self.BTconn.write(data)
+        print(data)
         return
     
     def PowerState(self):
@@ -128,10 +147,16 @@ class HomeWindow(QDialog, home_ui) :
         time.sleep(0.1)
 
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     DBconn = Connect("manager", "0000") 
-    myWindows = HomeWindow(True, DBconn)
-    myWindows.show()
-    DBconn.disConnection()
+
+    # Connect 클래스의 인스턴스가 생성되었는지 확인 후 HomeWindow 객체 생성
+    if DBconn.conn is not None:
+        myWindow = HomeWindow(True, DBconn)
+        myWindow.show()
+    else:
+        print("DB 연결 실패!")
+
+    # QApplication 실행 후 종료
     sys.exit(app.exec_())
