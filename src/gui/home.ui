@@ -22,7 +22,7 @@
    <property name="geometry">
     <rect>
      <x>670</x>
-     <y>22</y>
+     <y>20</y>
      <width>121</width>
      <height>20</height>
     </rect>
@@ -63,8 +63,8 @@
   <widget class="QPushButton" name="btnEmergency">
    <property name="geometry">
     <rect>
-     <x>920</x>
-     <y>70</y>
+     <x>770</x>
+     <y>80</y>
      <width>131</width>
      <height>111</height>
     </rect>
@@ -82,8 +82,8 @@ STOP</string>
   <widget class="QPushButton" name="btnPower">
    <property name="geometry">
     <rect>
-     <x>770</x>
-     <y>70</y>
+     <x>610</x>
+     <y>80</y>
      <width>131</width>
      <height>111</height>
     </rect>
@@ -97,11 +97,11 @@ STOP</string>
     <string>POWER</string>
    </property>
   </widget>
-  <widget class="QTextEdit" name="editGoal">
+  <widget class="QTextEdit" name="editNow_2">
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>370</y>
+     <y>410</y>
      <width>171</width>
      <height>171</height>
     </rect>
@@ -110,11 +110,11 @@ STOP</string>
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QTextEdit" name="editNow">
+  <widget class="QTextEdit" name="editGoal">
    <property name="geometry">
     <rect>
      <x>320</x>
-     <y>370</y>
+     <y>410</y>
      <width>171</width>
      <height>171</height>
     </rect>
@@ -127,7 +127,7 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>570</x>
-     <y>370</y>
+     <y>410</y>
      <width>171</width>
      <height>171</height>
     </rect>
@@ -140,7 +140,7 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>820</x>
-     <y>370</y>
+     <y>410</y>
      <width>171</width>
      <height>171</height>
     </rect>
@@ -153,28 +153,7 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>290</y>
-     <width>67</width>
-     <height>61</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Ubuntu Mono</family>
-     <pointsize>28</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>목표</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>370</x>
-     <y>290</y>
+     <y>330</y>
      <width>67</width>
      <height>61</height>
     </rect>
@@ -191,11 +170,32 @@ STOP</string>
     <string>현재</string>
    </property>
   </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>330</y>
+     <width>67</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Ubuntu Mono</family>
+     <pointsize>28</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>목표</string>
+   </property>
+  </widget>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
      <x>620</x>
-     <y>290</y>
+     <y>330</y>
      <width>67</width>
      <height>61</height>
     </rect>
@@ -216,7 +216,7 @@ STOP</string>
    <property name="geometry">
     <rect>
      <x>870</x>
-     <y>290</y>
+     <y>330</y>
      <width>67</width>
      <height>61</height>
     </rect>
@@ -257,9 +257,9 @@ STOP</string>
   <widget class="QTableWidget" name="tableWidget">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>120</y>
-     <width>651</width>
+     <x>10</x>
+     <y>90</y>
+     <width>581</width>
      <height>91</height>
     </rect>
    </property>
@@ -328,10 +328,10 @@ STOP</string>
   <widget class="QPushButton" name="btnLogOut">
    <property name="geometry">
     <rect>
-     <x>850</x>
-     <y>200</y>
-     <width>111</width>
-     <height>71</height>
+     <x>920</x>
+     <y>80</y>
+     <width>131</width>
+     <height>111</height>
     </rect>
    </property>
    <property name="font">
@@ -340,7 +340,40 @@ STOP</string>
     </font>
    </property>
    <property name="text">
-    <string>Log Out</string>
+    <string>LOG OUT</string>
+   </property>
+  </widget>
+  <widget class="QProgressBar" name="progressBar">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>260</y>
+     <width>951</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="value">
+    <number>24</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>220</y>
+     <width>361</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>15</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>작업 진행률</string>
    </property>
   </widget>
  </widget>
