@@ -91,6 +91,11 @@
    </column>
    <column>
     <property name="text">
+     <string>At_Work</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
      <string>P</string>
     </property>
    </column>
