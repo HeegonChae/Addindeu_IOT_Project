@@ -8,12 +8,6 @@ from login import LoginWindow, RegisterWindow
 from home import HomeWindow
 from Connect import Connect
 
-import serial
-import time
-import struct
-import requests
-import json
-
 class MainUI(QWidget): 
     
     def __init__(self, DBconn):
@@ -56,51 +50,25 @@ class MainUI(QWidget):
         self.worker_uid = userid
         # homewinodw 인스턴스 생성
         self.homewindow = HomeWindow(True, userid, DBconn)
-        # home.ui tableWidget 초기화 
-        self.tableWidget = self.homewindow.tableWidget
-        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         # Widget에 창 추가
         self.widget.addWidget(self.homewindow)
         # home.ui 창 열기 
         self.widget.setCurrentIndex(2)
-        # home.ui와 DB 연동
-        self.ShowWorkerInfo()
-
         # 로그아웃 성공 시그널 확인 
         self.homewindow.logoutSuccess.connect(self.OnLogoutSuccess)
         
     def OnLogoutSuccess(self, msg):
+        print("OnLogoutSuccess()")
         if msg == "logout":
             # 로그아웃 비교 대상
-            goal = self.tableWidget.item(0, 2)
-            current = self.tableWidget.item(0, 3)
-            if goal is not None:
-                goal = goal.text()
-                current = current.text()
-                # 로그아웃 조건
-                if current >= goal:
-                    QMessageBox.information(self, "LogOut Output", "Well done! \n You can leave now!")
-                     # 아두이노에서 받기 종료
-                    self.homewindow.recv.stop()
-                    # 타이머 종료
-                    self.homewindow.timer.stop()
-                    # 초기 로그인 화면으로 리셋
-                    self.ResetToLogin()
-                else:
-                    #QMessageBox.warning(self, "LogOut Output", "Are you sure to leave? \n You have not done yet!")
-                    retval = QMessageBox.question(self, "LogOut - Output",
-                                "Are you sure to leave? \n You have not done yet!",
-                                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-                    
-                    if retval == QMessageBox.Yes:
-                       # 일 완료x. 그렇지만 로그아웃
-                        # 아두이노에서 받기 종료
-                        self.homewindow.recv.stop()
-                        # 타이머 종료
-                        self.homewindow.timer.stop()
-                        self.ResetToLogin()
-                    else:
-                        return
+            #print(msg)
+            #QMessageBox.information(self, "LogOut Output", "Well done! \n You can leave now!")
+            # 아두이노에서 받기 종료
+            self.homewindow.recv.stop()
+            # 타이머 종료
+            self.homewindow.timer.stop()
+            # 초기 로그인 화면으로 리셋
+            self.ResetToLogin()
     
     def ResetToLogin(self):
         # 모든 UI 상태 및 데이터 초기화
@@ -124,63 +92,6 @@ class MainUI(QWidget):
         self.loginwindow.btnRegisternow.clicked.connect(self.ShowRegister)
         self.registerwindow.btnLoginnow.clicked.connect(self.ShowLogin)
         self.loginwindow.loginSuccess.connect(self.OnLoginSuccess)
-
-        # 리더기에서 다시 TAG DATA 읽어오기
-        self.loginwindow.recv.tagged.connect(self.tagged)
-
-    def tagged(self,data):
-        print("tagged")
-        if data :
-            addlist = []
-            self.p = 0
-            self.np = 0
-            self.updateText(self.editP,self.p)
-            self.updateText(self.editNp,self.np)
-            self.uid = data.decode()
-            print(self.uid)
-            query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
-            print(query)
-            addlist = self.DBconn.orderQuery(query,addlist)
-            print(addlist)
-            query = f"UPDATE employees SET NonPass = 0 WHERE ID = \'{self.uid}\'"
-            print(query)
-            self.DBconn.executeQuery(query)
-            query = f"UPDATE employees SET Pass = 0 WHERE ID = \'{self.uid}\'"
-            print(query)
-            self.DBconn.executeQuery(query)
-            query = f"UPDATE employees SET CURRENT = 0 WHERE ID = \'{self.uid}\'"
-            print(query)
-            self.DBconn.executeQuery(query)
-            query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
-            print(query)
-            addlist = []
-            addlist = self.DBconn.orderQuery(query,addlist)
-            self.goal = addlist[0][3]
-            self.updateText(self.editGoal,self.goal)
-        else :
-            QMessageBox.warning(self,'통신 오류','통신에 실패하였습니다.')
-        return
-    
-    def updateText(self,name,value):
-        value = str(value)
-        name.setText(value)
-        name.setAlignment(Qt.AlignCenter)
-    
-    def ShowWorkerInfo(self):
-        # print(f"User logged in with ID: {self.worker_uid}")
-        addlist = []
-        query = f"select Name, ID, GOAL, CURRENT from employees where ID = \'{self.worker_uid}\'"
-        addlist = self.DBconn.orderQuery(query, addlist)
-        workerInfo = addlist[0]
-        name = workerInfo[0]; id = workerInfo[1]; goal = workerInfo[2]; current = workerInfo[3]
-
-        # 로그인에서 입력 받은 데이터 home.ui TableWidget에 보이기
-        row = self.tableWidget.rowCount()
-        self.tableWidget.insertRow(row)
-        self.tableWidget.setItem(row, 0, QTableWidgetItem(name))
-        self.tableWidget.setItem(row, 1, QTableWidgetItem(id))
-        self.tableWidget.setItem(row, 2, QTableWidgetItem(str(goal)))
-        self.tableWidget.setItem(row, 3, QTableWidgetItem(str(current)))
 
     def ShowLogin(self):
         self.registerwindow.enterName.clear()
@@ -211,4 +122,3 @@ if __name__ == "__main__":
     app.exec_()
     # 애플리케이션 종료 시 DB 연결 종료
     DBconn.disConnection()
-

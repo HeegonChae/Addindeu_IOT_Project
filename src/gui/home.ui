@@ -317,7 +317,7 @@ STOP</string>
    </column>
    <column>
     <property name="text">
-     <string>Current</string>
+     <string>AT_WORK</string>
     </property>
    </column>
   </widget>

@@ -27,6 +27,8 @@ class HomeWindow(QDialog, home_ui) :
         self.lcdTimer.display('')
         self.lcdTimer.setDigitCount(8)
 
+        #self.LoginOK()
+
         # 날씨 관련 파라미터
         self.forecastApi = "6e357d11903a3df81c1cff95bca0f2af"
         self.location = "Seoul" 
@@ -36,9 +38,9 @@ class HomeWindow(QDialog, home_ui) :
         # count변수
         self.p = 0
         self.np = 0
-        #self.goal = 0
-        self.total = self.p + self.np
-        
+        self.total = 0
+        self.gohomeFlag = False
+        self.editGoal.clear()
         # DB 인스턴스 파라미터 
         self.DBconn = DBconn
         # ON/OFF 클릭 I/O 상태
@@ -46,8 +48,10 @@ class HomeWindow(QDialog, home_ui) :
         # RFID 리더기에게서 전달 받을 ID
         self.uid = homeUid
         self.setInfo()
+        #self.updateText(self.editGoal,self.goal)
         # 아두이노와 통신 프로토콜 담당
         self.BTconn = serial.Serial(port='/dev/ttyACM0', baudrate = 9600, timeout = 1)
+        #self.BTconn = serial.Serial(port='/dev/rfcomm0', baudrate = 9600, timeout = 1)
 
         if homerecvflag == True:
             self.recv = Receiver(self.BTconn)
@@ -59,10 +63,12 @@ class HomeWindow(QDialog, home_ui) :
         else:
             print("000000000*home*000000000")
         self.homerecvflag = homerecvflag
-
+        # Recevier의 시그널
         self.recv.detected.connect(self.detected)
         self.recv.c_sensored.connect(self.c_sensored)
-        self.recv.tagged.connect(self.tagged)
+        
+        # Main
+        self.ShowWorkerInfo()
         
         # Emergency Stop 버튼 이벤트 처리
         self.btnEmergency.clicked.connect(self.EmergencyStop)
@@ -74,18 +80,29 @@ class HomeWindow(QDialog, home_ui) :
         self.btnLogOut.clicked.connect(self.LogOut)
 
         self.updateText(self.editNow,'-')
-        self.updateText(self.editGoal,'-')
         self.updateText(self.editP,'-')
         self.updateText(self.editNp,'-')
     
     def LogOut(self):
         # 안전장치
         if self.homerecvflag == False: 
-            self.logoutSuccess.emit("logout")
-            # # 아두이노에서 받기 종료
-            # self.recv.stop()
-            # # 타이머 종료
-            # self.timer.stop()
+            if self.goal is not None:
+                # 로그아웃 조건
+                if self.total >= self.goal:
+                    QMessageBox.information(self, "로그아웃 알림", "로그아웃에 성공하였습니다. ")
+                    self.logoutSuccess.emit("logout")
+                else:
+                    retval = QMessageBox.question(self, "로그아웃 알림",
+                                "당신은 퇴근할 자격이 없습니다! \n 정말 로그아웃 합니까 ? ",
+                                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                    
+                    if retval == QMessageBox.Yes:
+                        self.logoutSuccess.emit("logout")
+                    else:
+                        return
+            query = f"UPDATE employees SET AT_WORK = 'N' WHERE ID = \'{self.uid}\'"
+            print(query)
+            self.DBconn.executeQuery(query)
     
     def Showtime(self):
         # 날짜
@@ -124,10 +141,13 @@ class HomeWindow(QDialog, home_ui) :
     
     def c_sensored(self,data):
         print("c_sensored")
-        if self.total >= self.goal :
+        if self.total == self.goal and self.gohomeFlag == False :
             QMessageBox.information(self,'작업 완료','열심히 일한자, 퇴근하라.')
-            self.recv.stop()
             self.TaskFinish()
+            self.gohomeFlag = True
+            return
+        elif self.total >= self.goal :
+            return
         else :
             if data :
                 print(data.decode())
@@ -137,6 +157,7 @@ class HomeWindow(QDialog, home_ui) :
                     print(query)
                     self.p += 1
                     self.updateText(self.editP,self.p)
+                    self.DBconn.executeQuery(query)
                 else : 
                     query = f"UPDATE employees SET NonPass = NonPass + 1 WHERE ID = \'{self.uid}\'"
                     print(query)
@@ -158,12 +179,17 @@ class HomeWindow(QDialog, home_ui) :
         self.np = 0
         self.updateText(self.editP,self.p)
         self.updateText(self.editNp,self.np)
+
+        query = f"UPDATE employees SET AT_WORK = 'Y' WHERE ID = \'{self.uid}\'"
+        print(query)
+        self.DBconn.executeQuery(query)
         
         print(self.uid)
         query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
         print(query)
         addlist = self.DBconn.orderQuery(query,addlist)
         print(addlist)
+        addlist = []
         query = f"UPDATE employees SET NonPass = 0 WHERE ID = \'{self.uid}\'"
         print(query)
         self.DBconn.executeQuery(query)
@@ -173,54 +199,39 @@ class HomeWindow(QDialog, home_ui) :
         query = f"UPDATE employees SET CURRENT = 0 WHERE ID = \'{self.uid}\'"
         print(query)
         self.DBconn.executeQuery(query)
-        query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
+        query = f"SELECT GOAL FROM employees WHERE ID = \'{self.uid}\'"
         print(query)
-        addlist = []
         addlist = self.DBconn.orderQuery(query,addlist)
-        self.goal = addlist[0][3]
-        self.updateText(self.editGoal,self.goal)
-        
+        print(addlist[0])
+        self.goal = addlist[0][0]
+        print(self.goal)
+        #self.updateText(self.editGoal,self.goal)    
         return
     
-    def tagged(self,data):
-        print("tagged")
-        if data :
-            addlist = []
-            self.p = 0
-            self.np = 0
-            self.updateText(self.editP,self.p)
-            self.updateText(self.editNp,self.np)
-            self.uid = data.decode()
-            print(self.uid)
-            query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
-            print(query)
-            addlist = self.DBconn.orderQuery(query,addlist)
-            print(addlist)
-            query = f"UPDATE employees SET NonPass = 0 WHERE ID = \'{self.uid}\'"
-            print(query)
-            self.DBconn.executeQuery(query)
-            query = f"UPDATE employees SET Pass = 0 WHERE ID = \'{self.uid}\'"
-            print(query)
-            self.DBconn.executeQuery(query)
-            query = f"UPDATE employees SET CURRENT = 0 WHERE ID = \'{self.uid}\'"
-            print(query)
-            self.DBconn.executeQuery(query)
-            query = f"SELECT * FROM employees WHERE ID = \'{self.uid}\'"
-            print(query)
-            addlist = []
-            addlist = self.DBconn.orderQuery(query,addlist)
-            self.goal = addlist[0][3]
-            self.updateText(self.editGoal,self.goal)
-        else :
-            QMessageBox.warning(self,'통신 오류','통신에 실패하였습니다.')
-        return
-    
-    def Send(self,command, flag=0):
+    def Send(self,command):
         print("send flag")
-        data = struct.pack('<2sic', command, flag, b'\n')
+        data = struct.pack('<3sc', command, b'\n')
         self.BTconn.write(data)
-        print(data)
+        print(data.decode())
         return
+    
+    def ShowWorkerInfo(self):
+        addlist = []
+        self.editGoal.clear()
+        query = f"select Name, ID, GOAL, AT_WORK from employees where ID = \'{self.uid}\'"
+        addlist = self.DBconn.orderQuery(query, addlist)
+        workerInfo = addlist[0]
+        name = workerInfo[0]; id = workerInfo[1]; goal = workerInfo[2]; at_work = workerInfo[3]
+
+        # 로그인에서 입력 받은 데이터 home.ui TableWidget에 보이기
+        row = self.tableWidget.rowCount()
+        self.tableWidget.insertRow(row)
+        self.tableWidget.setItem(row, 0, QTableWidgetItem(name))
+        self.tableWidget.setItem(row, 1, QTableWidgetItem(id))
+        self.tableWidget.setItem(row, 2, QTableWidgetItem(str(goal)))
+        self.tableWidget.setItem(row, 3, QTableWidgetItem(at_work))
+        self.updateText(self.editGoal,goal)
+
     
     def PowerState(self):
         if self.powerBtnState == False:
@@ -233,6 +244,7 @@ class HomeWindow(QDialog, home_ui) :
             self.btnPower.setText("On")
             self.PowerOff()
             self.powerBtnState = False
+    
 
     def EmergencyStop(self):
         print("Emergency Stop")
@@ -241,18 +253,24 @@ class HomeWindow(QDialog, home_ui) :
 
     def PowerOn(self):
         print("Power On")
-        self.Send(b'PF',1)
+        self.Send(b'PF1')
         time.sleep(0.1)
 
     def PowerOff(self):
         print("Power Off")
-        self.Send(b'PF')
+        self.Send(b'PF0')
         time.sleep(0.1)
 
     def TaskFinish(self):
         print("Finished")
         self.Send(b'FN')
         time.sleep(0.1)
+
+    def LoginOK(self):
+        print("Finished")
+        self.Send(b'OK')
+        time.sleep(0.1)
+
     
     def updateText(self,name,value):
         value = str(value)
