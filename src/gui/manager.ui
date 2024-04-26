@@ -17,8 +17,8 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>0</y>
-     <width>801</width>
+     <y>20</y>
+     <width>481</width>
      <height>61</height>
     </rect>
    </property>
@@ -31,28 +31,33 @@
     </font>
    </property>
    <property name="text">
-    <string>열심히는 필요없다. 잘해라. - 산지직송 대표 -</string>
+    <string>열심히는 필요없다. 잘해라.</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btnEmergency">
    <property name="geometry">
     <rect>
-     <x>890</x>
-     <y>120</y>
+     <x>900</x>
+     <y>150</y>
      <width>131</width>
      <height>111</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
    <property name="text">
-    <string> EmerGency
+    <string> EmerGency 
 STOP</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="btnSearch">
+  <widget class="QPushButton" name="btnSerch">
    <property name="geometry">
     <rect>
-     <x>340</x>
-     <y>120</y>
+     <x>730</x>
+     <y>150</y>
      <width>131</width>
      <height>111</height>
     </rect>
@@ -82,38 +87,35 @@ STOP</string>
    </column>
    <column>
     <property name="text">
+     <string>ID</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
      <string>Goal</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>Current</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>AT_WORK</string>
+     <string>At_Work</string>
     </property>
    </column>
   </widget>
   <widget class="QLineEdit" name="editName">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>150</y>
+     <x>520</x>
+     <y>180</y>
      <width>171</width>
      <height>25</height>
     </rect>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>150</y>
+     <x>440</x>
+     <y>180</y>
      <width>71</width>
      <height>21</height>
     </rect>
@@ -130,8 +132,8 @@ STOP</string>
   <widget class="QLineEdit" name="editId">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>190</y>
+     <x>520</x>
+     <y>220</y>
      <width>171</width>
      <height>25</height>
     </rect>
@@ -140,8 +142,8 @@ STOP</string>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>190</y>
+     <x>440</x>
+     <y>220</y>
      <width>71</width>
      <height>21</height>
     </rect>
@@ -153,6 +155,110 @@ STOP</string>
    </property>
    <property name="text">
     <string>ID</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>80</y>
+     <width>381</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Ubuntu Mono</family>
+     <pointsize>28</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>- (주) 산지직송 대표-</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelDate">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>40</y>
+     <width>191</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>20</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="lcdTimer">
+   <property name="geometry">
+    <rect>
+     <x>690</x>
+     <y>30</y>
+     <width>191</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>30</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <property name="lineWidth">
+    <number>6</number>
+   </property>
+   <property name="digitCount">
+    <number>8</number>
+   </property>
+   <property name="mode">
+    <enum>QLCDNumber::Dec</enum>
+   </property>
+   <property name="segmentStyle">
+    <enum>QLCDNumber::Flat</enum>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelWeather">
+   <property name="geometry">
+    <rect>
+     <x>870</x>
+     <y>30</y>
+     <width>161</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>20</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
  </widget>

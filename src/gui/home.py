@@ -40,7 +40,9 @@ class HomeWindow(QDialog, home_ui) :
         self.np = 0
         self.total = 0
         self.gohomeFlag = False
+        #self.editGoal = QLineEdit() 
         self.editGoal.clear()
+
         # DB 인스턴스 파라미터 
         self.DBconn = DBconn
         # ON/OFF 클릭 I/O 상태
@@ -48,6 +50,8 @@ class HomeWindow(QDialog, home_ui) :
         # RFID 리더기에게서 전달 받을 ID
         self.uid = homeUid
         self.setInfo()
+        self.ShowWorkerInfo()
+        
         #self.updateText(self.editGoal,self.goal)
         # 아두이노와 통신 프로토콜 담당
         self.BTconn = serial.Serial(port='/dev/ttyACM0', baudrate = 9600, timeout = 1)
@@ -66,9 +70,6 @@ class HomeWindow(QDialog, home_ui) :
         # Recevier의 시그널
         self.recv.detected.connect(self.detected)
         self.recv.c_sensored.connect(self.c_sensored)
-        
-        # Main
-        self.ShowWorkerInfo()
         
         # Emergency Stop 버튼 이벤트 처리
         self.btnEmergency.clicked.connect(self.EmergencyStop)
@@ -91,6 +92,7 @@ class HomeWindow(QDialog, home_ui) :
                 if self.total >= self.goal:
                     QMessageBox.information(self, "로그아웃 알림", "로그아웃에 성공하였습니다. ")
                     self.logoutSuccess.emit("logout")
+                    self.TaskFinish()
                 else:
                     retval = QMessageBox.question(self, "로그아웃 알림",
                                 "당신은 퇴근할 자격이 없습니다! \n 정말 로그아웃 합니까 ? ",
@@ -98,6 +100,7 @@ class HomeWindow(QDialog, home_ui) :
                     
                     if retval == QMessageBox.Yes:
                         self.logoutSuccess.emit("logout")
+                        self.TaskFinish()
                     else:
                         return
             query = f"UPDATE employees SET AT_WORK = 'N' WHERE ID = \'{self.uid}\'"
@@ -205,7 +208,7 @@ class HomeWindow(QDialog, home_ui) :
         print(addlist[0])
         self.goal = addlist[0][0]
         print(self.goal)
-        #self.updateText(self.editGoal,self.goal)    
+        self.updateText(self.editGoal,self.goal)    
         return
     
     def Send(self,command):
@@ -217,11 +220,11 @@ class HomeWindow(QDialog, home_ui) :
     
     def ShowWorkerInfo(self):
         addlist = []
-        self.editGoal.clear()
         query = f"select Name, ID, GOAL, AT_WORK from employees where ID = \'{self.uid}\'"
         addlist = self.DBconn.orderQuery(query, addlist)
         workerInfo = addlist[0]
         name = workerInfo[0]; id = workerInfo[1]; goal = workerInfo[2]; at_work = workerInfo[3]
+        print(at_work)
 
         # 로그인에서 입력 받은 데이터 home.ui TableWidget에 보이기
         row = self.tableWidget.rowCount()
@@ -230,7 +233,8 @@ class HomeWindow(QDialog, home_ui) :
         self.tableWidget.setItem(row, 1, QTableWidgetItem(id))
         self.tableWidget.setItem(row, 2, QTableWidgetItem(str(goal)))
         self.tableWidget.setItem(row, 3, QTableWidgetItem(at_work))
-        self.updateText(self.editGoal,goal)
+        #self.goal = goal
+        #self.updateText(self.editGoal,goal)
 
     
     def PowerState(self):
@@ -248,7 +252,7 @@ class HomeWindow(QDialog, home_ui) :
 
     def EmergencyStop(self):
         print("Emergency Stop")
-        self.Send(b'EM')
+        self.Send(b'EM1')
         time.sleep(0.1)
 
     def PowerOn(self):
@@ -263,14 +267,8 @@ class HomeWindow(QDialog, home_ui) :
 
     def TaskFinish(self):
         print("Finished")
-        self.Send(b'FN')
+        self.Send(b'FN1')
         time.sleep(0.1)
-
-    def LoginOK(self):
-        print("Finished")
-        self.Send(b'OK')
-        time.sleep(0.1)
-
     
     def updateText(self,name,value):
         value = str(value)

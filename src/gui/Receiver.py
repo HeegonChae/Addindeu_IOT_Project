@@ -45,7 +45,7 @@ class Receiver(QThread):
                         self.tagged.emit(respond[2:])
                     else :
                         print("recv unknown cmd")
-                        print(recv_test)
+                        print(respond.decode())
                 print("running home recv...")
                 time.sleep(3)
 
