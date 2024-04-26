@@ -2,20 +2,18 @@
 #include "SoftwareSerial.h"
 HUSKYLENS huskylens;
 SoftwareSerial mySerial(10, 11);
-int ledPin = 13;
+
 void printResult(HUSKYLENSResult result);
 void setup() {
     Serial.begin(115200);
     mySerial.begin(9600);
-    pinMode (2, OUTPUT);
-    pinMode (3, OUTPUT);
-    pinMode (4, OUTPUT);
-    pinMode (7, OUTPUT);
-    pinMode (5, OUTPUT);
-    pinMode (6, OUTPUT);
-    pinMode(ledPin, OUTPUT);
-    analogWrite(5, 180); //motor1 enable pin
-    analogWrite(6, 180); //motor2 enable pin
+    pinMode (32, OUTPUT);
+    pinMode (33, OUTPUT);
+    pinMode (34, OUTPUT);
+    pinMode (37, OUTPUT);
+    pinMode (35, OUTPUT);
+    pinMode (36, OUTPUT);
+    //허스키렌즈가 성공적으로 시작될 때까지 반복
     while (!huskylens.begin(mySerial))
     {
         Serial.println(F("Begin failed!"));
@@ -27,11 +25,16 @@ void setup() {
 void loop()
 {
     if (!huskylens.request())
-Serial.println(F("Fail to request data from HUSKYLENS, recheck the connection!"));
+    Serial.println(F("Fail to request data from HUSKYLENS, recheck the connection!")); //데이터 요청 실패
     else if(!huskylens.isLearned())
-Serial.println(F("Nothing learned, press learn button on HUSKYLENS to learn one!"));
+    Serial.println(F("Nothing learned, press learn button on HUSKYLENS to learn one!")); //학습 데이터 없음
     else if(!huskylens.available())
-Serial.println(F("No block or arrow appears on the screen!"));
+    {
+      Serial.println(F("No block or arrow appears on the screen!")); //화면에 객체 없음
+      stop();
+
+    }
+
     else
     {
         Serial.println(F("###########"));
@@ -43,6 +46,7 @@ Serial.println(F("No block or arrow appears on the screen!"));
         }
     }
 }
+//결과 데이터를 시리얼 모니터에 출력
 void printResult(HUSKYLENSResult result){
     if (result.command == COMMAND_RETURN_BLOCK){
         Serial.println(String()+F("Block:xCenter=")+result.xCenter+F(",yCenter=")+result.yCenter+F(",width=")+result.width+F(",height=")+result.height+F(",ID=")+result.ID);
@@ -54,23 +58,26 @@ void printResult(HUSKYLENSResult result){
         Serial.println("Object unknown!");
     }
 }
+//로봇 구동 로직 처리
 void driveBot(HUSKYLENSResult result)
 {
-  if(result.xCenter<=90)
+  if(result.xCenter<=70)
   {
     left();
+    
   }
-  else if(result.xCenter>=190)
+  else if(result.xCenter>=270)
   {
     right();
+    
   }
-    else if((result.xCenter>=90)&&(result.xCenter<=190))
+    else if((result.xCenter>=70)&&(result.xCenter<=270))
   {
-    if(result.width<=50)
+    if(result.width<=30)
     {
       forward();
     }
-    else if(result.width>50)
+    else
     {
       stop();
     }
@@ -78,46 +85,49 @@ void driveBot(HUSKYLENSResult result)
 }
 void stop()
 {
-digitalWrite(2, LOW);
-digitalWrite(3, LOW);
-digitalWrite(7, LOW);
-digitalWrite(4, LOW);
-digitalWrite(ledPin, LOW);
+digitalWrite(32, LOW);
+digitalWrite(33, LOW);
+digitalWrite(37, LOW);
+digitalWrite(34, LOW);
 Serial.println("Stop");
-}
-void right()
-{
-digitalWrite(2, HIGH);
-digitalWrite(3, LOW);
-digitalWrite(7, LOW);
-digitalWrite(4, HIGH);
-digitalWrite(ledPin, HIGH);
-Serial.println(" Rotate Right");
 }
 void left()
 {
-digitalWrite(2, LOW);
-digitalWrite(3, HIGH);
-digitalWrite(7, HIGH);
-digitalWrite(4, LOW);
-digitalWrite(ledPin, HIGH);
+digitalWrite(32, HIGH);
+digitalWrite(33, LOW);
+digitalWrite(37, LOW);
+digitalWrite(34, HIGH);
+
+analogWrite(35, 130);
+analogWrite(36, 200);
 Serial.println(" Rotate Left");
+}
+void right()
+{
+digitalWrite(32, LOW);
+digitalWrite(33, HIGH);
+digitalWrite(37, HIGH);
+digitalWrite(34, LOW);
+
+analogWrite(35, 130);
+analogWrite(36, 200);
+Serial.println(" Rotate Right");
 }
 void forward()
 {
-digitalWrite(2, LOW);
-digitalWrite(3, HIGH);
-digitalWrite(7, LOW);
-digitalWrite(4, HIGH);
-digitalWrite(ledPin, HIGH);
+digitalWrite(32, LOW);
+digitalWrite(33, HIGH);
+digitalWrite(37, LOW);
+digitalWrite(34, HIGH);
+analogWrite(35, 130);
+analogWrite(36, 200);
 Serial.println("Forward");
 }
 void backward()
 {
-digitalWrite(2, HIGH);
-digitalWrite(3, LOW);
-digitalWrite(7, HIGH);
-digitalWrite(4, LOW);
-digitalWrite(ledPin, HIGH);
+digitalWrite(32, HIGH);
+digitalWrite(33, LOW);
+digitalWrite(37, HIGH);
+digitalWrite(34, LOW);
 Serial.println("Forward");
 }
