@@ -43,6 +43,8 @@ IoT 프로젝트 2조 저장소. 농작물 수거
 |팀원|이유민|<ul><li> RC카 및 로봇 팔 등 Arduino IDE 코드 작성</li><li> 메인 PC와 Arduino Board 간 통신 제어</li></ul>|
 </div> 
 
+***
+
 ## 프로젝트 설계
 ### 시스템 구성도
 #### 1. 제품 설계도
@@ -73,6 +75,12 @@ IoT 프로젝트 2조 저장소. 농작물 수거
   <div align=center> 
   <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/dbae9f79-c74f-41a3-b806-9fde058acdac" width="800">
   </div> 
+  
+- 명령어 흐름도
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/34cef795-b55a-41d5-b2f5-bcb173bb0ae1" width="1000">
+  </div> 
+  
 - 블루투스 통신 프로토콜
   <div align=center> 
   <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/6af1c3fa-3447-46ce-b785-5e84250cb4a3" width="400">
@@ -102,7 +110,64 @@ IoT 프로젝트 2조 저장소. 농작물 수거
   <div align=center> 
   <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/25fdabcc-2479-4e83-bd11-b86f88dd4fd2" width="700">
   </div>
-  
+
 ### GUI
 
-## 실행 방법
+<div align=center>
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/02c5e443-8844-4a24-974c-fe21710c53b1" width="400">
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/5d555d85-e1a2-43b8-bb7e-6d8ca1911894" width="400">
+    <br>
+  <div align=center> 
+  (1) 로그인 화면&emsp;&emsp;&emsp;(2) 회원가입 화면
+  </div>    
+</div>
+  <br>  <br>
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/9344330c-9697-4a7c-b918-735200868f6d" width="400">
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/e01d4e1d-9a2f-449c-8b7a-e7ed5e62a7b4" width="400">
+    <br>
+   <div align=center> 
+  (3) 작업자 화면&emsp;&emsp;&emsp;(4) 관리자 화면
+  </div>    
+  </div>
+
+
+### 시퀀스 다이어그램
+#### 1-1. 미등록 작업자 등록 후 로그인 완료 시나리오
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/8f78b038-9988-4ee2-b1e7-cd648871e7cd" width="600">
+  </div>
+  
+#### 1-2. 목표 달성 후 로그아웃 시나리오
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/c2bbf856-7525-4ec3-bf29-c2cfb831fc2c" width="600">
+  </div>
+  
+#### 2-1. 등급별 정돈(양품) 시나리오
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/a20df8ae-efd0-4630-ba8c-d1dcf0bb5c77" width="600">
+  </div>
+  
+#### 2-2. 등급별 정돈(불량품) 시나리오
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/860ea7ce-d831-4ff2-a683-64a036aff4e4" width="600">
+  </div>
+  
+#### 2-3. 등급별 정돈(작업 대상 부재) 시나리오
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/d1ae2893-fe9c-423b-9caa-2252cbd1cf1b" width="600">
+  </div>
+  
+#### 3-1. 작업자 따라 이동(정상) 시나리오
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/a50b97ec-1439-47df-931e-ae43675cbaad" width="600">
+  </div>
+  
+#### 3-2. 작업자 따라 이동(실패) 시나리오
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/31fb921c-a3fa-45d0-90fd-32556e103a4a" width="600">
+  </div>
+  
+------------------
+
+### 시연영상
