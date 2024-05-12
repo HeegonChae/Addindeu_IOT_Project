@@ -231,3 +231,8 @@ IoT 프로젝트 2조 저장소. 농작물 수거
   <div align=center> 
   <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/456a4eeb-384d-49db-8471-1f9d03fdcd8a" width="400">
   </div>
+
+  ------------------
+  #### 협업 툴 링크
+  - [컨플루언스 - 회의록](https://iotrepo2.atlassian.net/wiki/spaces/PM/pages/98675)
+  - [JIRA - 칸반보드](https://iotrepo2.atlassian.net/jira/software/projects/IT/boards/1?atlOrigin=eyJpIjoiNDJjOGVjNWExMzMyNDgwYWJlYmU5ZTdmYTMzNTU4M2EiLCJwIjoiaiJ9)
