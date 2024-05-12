@@ -1,3 +1,4 @@
+
 # iot-repo-2
 IoT 프로젝트 2조 저장소. 농작물 수거 
 
@@ -46,23 +47,6 @@ IoT 프로젝트 2조 저장소. 농작물 수거
 ***
 
 ## 프로젝트 설계
-### 기능 리스트
-- (1) 작업자 인식 기능
-  <div align=center> 
-  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/f7da4214-c5e5-4f90-bf23-47246ee25742" width="700">
-  </div>
-  <br>
-- (2) 인식한 작업자 따라 정상 이동 기능
-  <div align=center> 
-  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/5e9eec3b-b0df-4359-980c-7a7d33e879cb" width="700">
-  </div>
-  <br>
-- (3) 등급별 정돈 정상 작동 기능
-  <div align=center> 
-  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/25fdabcc-2479-4e83-bd11-b86f88dd4fd2" width="700">
-  </div>
-  <br>
-  
 ### 시스템 구성도
 #### 1. 제품 설계도
   <div align=center> 
@@ -113,7 +97,21 @@ IoT 프로젝트 2조 저장소. 농작물 수거
   - **PF**: 전원인가 여부(T/F)
   - **EM**: 비상정지 여부(T/F)
   - **FN**: 작업완료 알람 여부(T/F)
-  - 
+    
+### 기능 리스트
+- (1) 작업자 인식 기능
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/f7da4214-c5e5-4f90-bf23-47246ee25742" width="700">
+  </div>
+- (2) 인식한 작업자 따라 정상 이동 기능
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/5e9eec3b-b0df-4359-980c-7a7d33e879cb" width="700">
+  </div>
+- (3) 등급별 정돈 정상 작동 기능
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/25fdabcc-2479-4e83-bd11-b86f88dd4fd2" width="700">
+  </div>
+
 ### GUI
 
 <div align=center>
@@ -141,7 +139,7 @@ IoT 프로젝트 2조 저장소. 농작물 수거
   <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/8f78b038-9988-4ee2-b1e7-cd648871e7cd" width="600">
   </div>
   
-#### 1-2. 목표 달성 후 로그아웃 시나리오
+#### 1-2. 목표작업량 달성 후 로그아웃 시나리오
   <div align=center> 
   <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/c2bbf856-7525-4ec3-bf29-c2cfb831fc2c" width="600">
   </div>
@@ -172,5 +170,64 @@ IoT 프로젝트 2조 저장소. 농작물 수거
   </div>
   
 ------------------
-
 ### 시연영상
+- 단위: 5 FPS
+- [동영상 압축](https://www.veed.io/tools/video-compressor?locale=ko-KR&source=%2Ftools%2Fvideo-compressor%2Fgif-compressor)
+- [GIF 파일 변환](https://gifmaker.me/video-to-gif/)
+  
+#### 1-1. 미등록 작업자 등록 후 로그인 완료 시나리오 시연
+- 작업요청 -> 작업자 ID 전송 -> 로그인 정보(PW) 입력 -> 로그인 시도
+  - **DB에 등록된 로그인 정보(ID/PW) NO** -> 새로운 작업자 정보(**이름, ID, PW, 개별작업량**) DB 등록 -> 로그인 재시도
+  - **DB에 등록된 로그인 정보(ID/PW) YES** -> 로그인 성공
+    
+  <div align=center> 
+  <br/>
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/a5a9b808-2642-4b22-af32-21575438498c" height ="400">
+  </div>
+  
+#### 1-2. 목표작업량 달성 후 로그아웃 시나리오 시연
+- 작업요청 -> 로그인 성공 -> **DB 출근 여부('AT_WORK') 열 업데이트(N -> Y)** & 로봇 전원 ON -> 작업시작
+- 목표작업량 달성 -> 로그아웃 시도 성공 -> **DB 출근 여부('AT_WORK') 열 업데이트(Y -> N)** & 목표달성 신호 -> 작업종료
+  <div align=center> 
+  <br/>
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/e8d7e63c-73d7-4666-8598-b95cf86a9f2f" height ="600">
+  </div>
+  
+#### 2-1. 등급별 정돈(양품) 시나리오 시연
+- 양품(🔴 공) 정돈 
+  <div align=center> 
+  <br/>
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/9b683557-4136-4b34-99e5-6262ea75fee7" width="400">
+  </div>
+  
+#### 2-2. 등급별 정돈(불량품) 시나리오 시연
+- 불량품(🟢 공) 정돈 
+  <div align=center> 
+  <br/>
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/9622de9b-a5d0-40e2-b972-f4f82bd16925" width="400">
+  </div>
+  
+#### 2-3. 등급별 정돈(작업 대상 부재) 시나리오 시연
+- 1차 로봇팔 집기 동작 -> 대기 상태 -> 인식 상태 -> 2차 로봇팔 집기 동작
+  <div align=center> 
+  <br/>
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/3d5b4c53-b2a8-4e37-ac24-63cf3014d26b" width="400">
+  </div>
+  
+#### 3-1. 작업자 따라 이동(정상) 시나리오 시연
+- 전진
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/4e87148d-480e-4ddf-882e-c0e9bc4e6712" width="400">
+  </div>
+
+- 우회전
+  - Stop -> **Right** -> Forward
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/b17fe979-8239-4dde-aea0-10ae2f0fa378" width="400">
+  </div>
+  
+- 좌회전
+  - Stop -> **Left** -> Forward
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/456a4eeb-384d-49db-8471-1f9d03fdcd8a" width="400">
+  </div>
