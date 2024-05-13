@@ -47,6 +47,20 @@ IoT 프로젝트 2조 저장소. 농작물 수거
 ***
 
 ## 프로젝트 설계
+### 기능 리스트
+- (1) 작업자 인식 기능
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/f7da4214-c5e5-4f90-bf23-47246ee25742" width="700">
+  </div>
+- (2) 인식한 작업자 따라 정상 이동 기능
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/5e9eec3b-b0df-4359-980c-7a7d33e879cb" width="700">
+  </div>
+- (3) 등급별 정돈 정상 작동 기능
+  <div align=center> 
+  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/25fdabcc-2479-4e83-bd11-b86f88dd4fd2" width="700">
+  </div>
+
 ### 시스템 구성도
 #### 1. 제품 설계도
   <div align=center> 
@@ -97,20 +111,6 @@ IoT 프로젝트 2조 저장소. 농작물 수거
   - **PF**: 전원인가 여부(T/F)
   - **EM**: 비상정지 여부(T/F)
   - **FN**: 작업완료 알람 여부(T/F)
-    
-### 기능 리스트
-- (1) 작업자 인식 기능
-  <div align=center> 
-  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/f7da4214-c5e5-4f90-bf23-47246ee25742" width="700">
-  </div>
-- (2) 인식한 작업자 따라 정상 이동 기능
-  <div align=center> 
-  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/5e9eec3b-b0df-4359-980c-7a7d33e879cb" width="700">
-  </div>
-- (3) 등급별 정돈 정상 작동 기능
-  <div align=center> 
-  <img src="https://github.com/addinedu-ros-5th/iot-repo-2/assets/113625699/25fdabcc-2479-4e83-bd11-b86f88dd4fd2" width="700">
-  </div>
 
 ### GUI
 
