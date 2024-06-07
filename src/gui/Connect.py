@@ -3,7 +3,7 @@ import mysql.connector as con
 class Connect():
     def __init__(self,User,Password):
         self.conn = con.connect(
-            host = "database-1.cdigc6umyoh0.ap-northeast-2.rds.amazonaws.com",
+            host = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
             port = 3306,
             user = User,
             password = Password,
@@ -39,7 +39,7 @@ class Connect():
 
         
 if __name__ == "__main__" :
-    db_instance = Connect("manager", "0000")
+    db_instance = Connect("manager", "xxxxx")
     addlist = []
 
     # Case 1.
