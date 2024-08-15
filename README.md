@@ -40,7 +40,7 @@ IoT 프로젝트 2조 저장소. 농작물 수거 <br/>
   
 |**구분**|**이름**|**역할**|
 |:------:|:------:|:-------|
-|팀장|채희곤|<ul><li>'Login', 'Register', 'Home' 및 'Main' window GUI 코드 작성</li><li> 데이터베이스 관리 시스템 및 GitHub, JIRA 등 협업 툴 환경 설정 및 관리</li><li>PPT 문서 작업</li></ul>|
+|팀장|채희곤|<ul><li>'Login', 'Register', 'Home' 및 'Main' window GUI 코드 작성</li><li> 데이터베이스 관리 시스템 및 GitHub, JIRA 등 협업 툴 환경 설정 및 관리</li></ul>|
 |팀원|현혜지|<ul><li>'Login', 'Register', 'Home' 및 'Main' window GUI 코드 작성</li><li> 메인 PC와 Arduino Board 간 통신 제어</li></ul>|
 |팀원|홍권호|<ul><li>RC카 및 로봇 팔 등 하드웨어 설계</li><li> RC카 및 로봇 팔 등 Arduino IDE 코드 작성</li></ul>|
 |팀원|이유민|<ul><li> RC카 및 로봇 팔 등 Arduino IDE 코드 작성</li><li> 메인 PC와 Arduino Board 간 통신 제어</li></ul>|
